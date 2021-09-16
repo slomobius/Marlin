@@ -2057,7 +2057,7 @@
  *
  * :[0:'Classic', 1:'Průša']
  */
-#define 0
+#define LCD_INFO_SCREEN_STYLE 0
 
 /**
  * SD CARD
