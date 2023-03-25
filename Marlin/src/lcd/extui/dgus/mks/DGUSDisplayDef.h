@@ -28,9 +28,9 @@
 #define LOGO_TIME_DELAY TERN(USE_MKS_GREEN_UI, 8000, 1500)
 
 #if ENABLED(DGUS_MKS_RUNOUT_SENSOR)
-  #define MT_DET_1_PIN         1
-  #define MT_DET_2_PIN         2
-  #define MT_DET_PIN_INVERTING false
+  #define MT_DET_1_PIN     1
+  #define MT_DET_2_PIN     2
+  #define MT_DET_PIN_STATE LOW
 #endif
 
 #define MKS_FINSH
@@ -100,7 +100,7 @@ extern EX_FILAMENT_DEF ex_filament;
 typedef enum {
   UNRUNOUT_STATUS,
   RUNOUT_STATUS,
-  RUNOUT_WAITTING_STATUS,
+  RUNOUT_WAITING_STATUS,
   RUNOUT_BEGIN_STATUS,
 } RUNOUT_MKS_STATUS_DEF;
 
@@ -256,10 +256,10 @@ constexpr uint16_t VP_E1_STATUS = 0x3412;
 constexpr uint16_t VP_MOVE_OPTION = 0x3500;
 
 // // PIDs
-// constexpr uint16_t VP_E0_PID_P = 0x3700; // at the moment , 2 byte unsigned int , 0~1638.4
+// constexpr uint16_t VP_E0_PID_P = 0x3700; // at the moment , uint16_t , 0~1638.4
 // constexpr uint16_t VP_E0_PID_I = 0x3702;
 // constexpr uint16_t VP_E0_PID_D = 0x3704;
-// constexpr uint16_t VP_E1_PID_P = 0x3706; // at the moment , 2 byte unsigned int , 0~1638.4
+// constexpr uint16_t VP_E1_PID_P = 0x3706; // at the moment , uint16_t , 0~1638.4
 // constexpr uint16_t VP_E1_PID_I = 0x3708;
 // constexpr uint16_t VP_E1_PID_D = 0x370A;
 // constexpr uint16_t VP_BED_PID_P = 0x3710;
@@ -414,7 +414,7 @@ constexpr uint16_t SP_T_Bed_Set   = 0x5040;
   constexpr uint16_t VP_FAN3_STATUS                   = 0x2716;
 
   // Step per mm
-  constexpr uint16_t VP_X_STEP_PER_MM                 = 0x2900;   // at the moment , 2 byte unsigned int , 0~1638.4
+  constexpr uint16_t VP_X_STEP_PER_MM                 = 0x2900;   // at the moment , uint16_t , 0~1638.4
   constexpr uint16_t VP_Y_STEP_PER_MM                 = 0x2904;
   constexpr uint16_t VP_Z_STEP_PER_MM                 = 0x2908;
   constexpr uint16_t VP_E0_STEP_PER_MM                = 0x2910;
@@ -521,10 +521,10 @@ constexpr uint16_t SP_T_Bed_Set   = 0x5040;
   constexpr uint16_t VP_PrintTime_S                   = 0x3504;
 
   // PIDs
-  constexpr uint16_t VP_E0_PID_P = 0x3700; // at the moment , 2 byte unsigned int , 0~1638.4
+  constexpr uint16_t VP_E0_PID_P = 0x3700; // at the moment , uint16_t , 0~1638.4
   constexpr uint16_t VP_E0_PID_I = 0x3702;
   constexpr uint16_t VP_E0_PID_D = 0x3704;
-  constexpr uint16_t VP_E1_PID_P = 0x3706; // at the moment , 2 byte unsigned int , 0~1638.4
+  constexpr uint16_t VP_E1_PID_P = 0x3706; // at the moment , uint16_t , 0~1638.4
   constexpr uint16_t VP_E1_PID_I = 0x3708;
   constexpr uint16_t VP_E1_PID_D = 0x370A;
   constexpr uint16_t VP_BED_PID_P = 0x3710;
@@ -680,8 +680,8 @@ constexpr uint16_t SP_T_Bed_Set   = 0x5040;
   constexpr uint16_t VP_EX_TEMP_INFO2_Dis             = 0x5620;
   constexpr uint16_t VP_EX_TEMP_INFO3_Dis             = 0x5630;
   constexpr uint16_t VP_LCD_BLK_Dis                   = 0x56A0;
-  constexpr uint16_t VP_Info_PrinfFinsh_1_Dis         = 0x5C00;
-  constexpr uint16_t VP_Info_PrinfFinsh_2_Dis         = 0x5C10;
+  constexpr uint16_t VP_Info_PrintFinish_1_Dis        = 0x5C00;
+  constexpr uint16_t VP_Info_PrintFinish_2_Dis        = 0x5C10;
 
   constexpr uint16_t VP_Length_Dis                    = 0x5B00;
 

@@ -41,8 +41,8 @@ namespace ExtUI {
 
   void onIdle() { Chiron.IdleLoop(); }
 
-  void onPrinterKilled(PGM_P const error, PGM_P const component) {
-    Chiron.PrinterKilled(error,component);
+  void onPrinterKilled(FSTR_P const error, FSTR_P const component) {
+    Chiron.PrinterKilled(error, component);
   }
 
   void onMediaInserted() { Chiron.MediaEvent(AC_media_inserted); }
@@ -57,14 +57,16 @@ namespace ExtUI {
 
   void onPrintTimerStarted() { Chiron.TimerEvent(AC_timer_started); }
   void onPrintTimerPaused()  { Chiron.TimerEvent(AC_timer_paused);  }
-  void onPrintTimerStopped()                         { Chiron.TimerEvent(AC_timer_stopped); }
+  void onPrintTimerStopped() { Chiron.TimerEvent(AC_timer_stopped); }
+  void onPrintDone() {}
+
   void onFilamentRunout(const extruder_t)            { Chiron.FilamentRunout();             }
+
   void onUserConfirmRequired(const char * const msg) { Chiron.ConfirmationRequest(msg);     }
   void onStatusChanged(const char * const msg)       { Chiron.StatusChange(msg);            }
 
   void onHomingStart() {}
-  void onHomingComplete() {}
-  void onPrintFinished() {}
+  void onHomingDone() {}
 
   void onFactoryReset() {}
 
@@ -92,31 +94,38 @@ namespace ExtUI {
     // Called after loading or resetting stored settings
   }
 
-  void onConfigurationStoreWritten(bool success) {
+  void onSettingsStored(const bool success) {
     // Called after the entire EEPROM has been written,
     // whether successful or not.
   }
 
-  void onConfigurationStoreRead(bool success) {
+  void onSettingsLoaded(const bool success) {
     // Called after the entire EEPROM has been read,
     // whether successful or not.
   }
 
   #if HAS_MESH
-    void onMeshLevelingStart() {}
+    void onLevelingStart() {}
+    void onLevelingDone() {}
 
     void onMeshUpdate(const int8_t xpos, const int8_t ypos, const_float_t zval) {
       // Called when any mesh points are updated
-      //SERIAL_ECHOLNPAIR("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
+      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
     }
 
     void onMeshUpdate(const int8_t xpos, const int8_t ypos, const probe_state_t state) {
       // Called to indicate a special condition
-      //SERIAL_ECHOLNPAIR("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
+      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
     }
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
+    void onSetPowerLoss(const bool onoff) {
+      // Called when power-loss is enabled/disabled
+    }
+    void onPowerLoss() {
+      // Called when power-loss state is detected
+    }
     // Called on resume from power-loss
     void onPowerLossResume() { Chiron.PowerLossRecovery(); }
   #endif

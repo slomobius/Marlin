@@ -23,6 +23,8 @@
 
 /**
  * Cohesion3D ReMix pin assignments
+ * Schematic: https://green-candy.osdn.jp/external/MarlinFW/board_schematics/Cohesion3D%20ReMix/C3D%20ReMix%20rev2.svg
+ * Origin: https://github.com/Cohesion3D/Cohesion3D-ReMix/blob/master/C3D%20ReMix%20rev2.sch
  */
 
 #include "env_validate.h"
@@ -87,16 +89,14 @@
 //
 // Default pins for TMC software SPI
 //
-#if ENABLED(TMC_USE_SW_SPI)
-  #ifndef TMC_SW_MOSI
-    #define TMC_SW_MOSI                    P1_16  // Ethernet Expansion - Pin 5
-  #endif
-  #ifndef TMC_SW_MISO
-    #define TMC_SW_MISO                    P1_17  // Ethernet Expansion - Pin 6
-  #endif
-  #ifndef TMC_SW_SCK
-    #define TMC_SW_SCK                     P1_08  // Ethernet Expansion - Pin 7
-  #endif
+#ifndef TMC_SPI_MOSI
+  #define TMC_SPI_MOSI                     P1_16  // Ethernet Expansion - Pin 5
+#endif
+#ifndef TMC_SPI_MISO
+  #define TMC_SPI_MISO                     P1_17  // Ethernet Expansion - Pin 6
+#endif
+#ifndef TMC_SPI_SCK
+  #define TMC_SPI_SCK                      P1_08  // Ethernet Expansion - Pin 7
 #endif
 
 //
@@ -229,8 +229,6 @@
   #define SDCARD_CONNECTION              ONBOARD
 #endif
 
-#define ONBOARD_SD_CS_PIN                  P0_06  // Chip select for "System" SD card
-
 #if SD_CONNECTION_IS(LCD) || SD_CONNECTION_IS(ONBOARD)
   #define SD_SCK_PIN                       P0_07  // (52)  system defined J3-9 & AUX-3
   #define SD_MISO_PIN                      P0_08  // (50)  system defined J3-10 & AUX-3
@@ -239,6 +237,7 @@
     #define SD_SS_PIN                      P1_23  // (53)  system defined J3-5 & AUX-3 (Sometimes called SDSS) - CS used by Marlin
   #else
     #undef SD_DETECT_PIN
+    #define ONBOARD_SD_CS_PIN              P0_06  // Chip select for "System" SD card
     #define SD_SS_PIN          ONBOARD_SD_CS_PIN
   #endif
 #elif SD_CONNECTION_IS(CUSTOM_CABLE)
