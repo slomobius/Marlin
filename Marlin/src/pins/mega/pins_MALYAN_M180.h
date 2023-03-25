@@ -24,8 +24,6 @@
 /**
  * Malyan M180 pin assignments
  * Contributed by Timo Birnschein (timo.birnschein@microforge.de)
- * @Timo: sind diese Pin Definitionen immernoch korrekt? (Antwort an turningtides@outlook.de bitte)
- * ATmega2560
  */
 
 #include "env_validate.h"

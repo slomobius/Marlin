@@ -22,9 +22,7 @@
 #pragma once
 
 /**
- * Makerbase MKS SBASE pin assignments
- * Schematic (V1.3): https://green-candy.osdn.jp/external/MarlinFW/board_schematics/MKS%20SBASE%20V1.3/MKS%20SBASE%20V1.3_002%20SCH.pdf
- * Origin (V1.3): http://green-candy.osdn.jp/external/MarlinFW/board_schematics/MKS%20SBASE%20V1.3/MKS%20SBASE%20V1.3_002%20SCH.pdf
+ * MKS SBASE pin assignments
  */
 
 #include "env_validate.h"
@@ -140,10 +138,14 @@
 //
 // Power Supply Control
 //
-#if ENABLED(MKS_PWC)
-  #define PS_ON_PIN                        P0_25  // SERVO
-  #define KILL_PIN                         P1_29  // Z+
-  #define KILL_PIN_STATE                    HIGH
+#if ENABLED(PSU_CONTROL)                          // MKSPWC
+  #ifndef PS_ON_PIN
+    #define PS_ON_PIN                      P0_25  // SERVO
+  #endif
+  #ifndef KILL_PIN
+    #define KILL_PIN                       P1_29  // Z+
+    #define KILL_PIN_STATE                  HIGH
+  #endif
 #endif
 
 //
@@ -167,6 +169,8 @@
   #define SDCARD_CONNECTION              ONBOARD
 #endif
 
+#define ONBOARD_SD_CS_PIN                  P0_06  // Chip select for "System" SD card
+
 #if SD_CONNECTION_IS(CUSTOM_CABLE)
 
   /**
@@ -186,7 +190,7 @@
   #define SD_MISO_PIN                      P1_23  // J8-3 (moved from EXP2 P0.8)
   #define SD_MOSI_PIN                      P2_12  // J8-4 (moved from EXP2 P0.9)
   #define SD_SS_PIN                        P0_28
-  #define SOFTWARE_SPI                            // With a custom cable we need software SPI because the
+  #define LPC_SOFTWARE_SPI                        // With a custom cable we need software SPI because the
                                                   // selected pins are not on a hardware SPI controller
 #elif SD_CONNECTION_IS(LCD) || SD_CONNECTION_IS(ONBOARD)
   #define SD_SCK_PIN                       P0_07
@@ -199,7 +203,6 @@
     #define SD_SS_PIN                      P0_28
   #else
     #define SD_DETECT_PIN                  P0_27
-    #define ONBOARD_SD_CS_PIN              P0_06  // Chip select for "System" SD card
     #define SD_SS_PIN          ONBOARD_SD_CS_PIN
   #endif
 #endif
@@ -217,9 +220,6 @@
  * that the garbage/lines are erased immediately after the SD card accesses are completed.
  */
 
-//
-// LCD / Controller
-//
 #if IS_TFTGLCD_PANEL
 
   #if ENABLED(TFTGLCD_PANEL_SPI)
@@ -240,7 +240,7 @@
   #define LCD_SDSS                         P0_28  // EXP2.4
   #define LCD_PINS_ENABLE                  P0_18  // EXP1.3
   #define LCD_PINS_D4                      P0_15  // EXP1.5
-  #if EITHER(VIKI2, miniVIKI)
+  #if ANY(VIKI2, miniVIKI)
     #define DOGLCD_SCK                SD_SCK_PIN
     #define DOGLCD_MOSI              SD_MOSI_PIN
   #endif
@@ -280,7 +280,11 @@
     #endif
 
   #elif ENABLED(MINIPANEL)
-    //#define LCD_SCREEN_ROTATE              180  // 0, 90, 180, 270
+    // GLCD features
+    // Uncomment screen orientation
+    //#define LCD_SCREEN_ROT_90
+    //#define LCD_SCREEN_ROT_180
+    //#define LCD_SCREEN_ROT_270
   #endif
 
 #endif // HAS_WIRED_LCD
@@ -302,14 +306,16 @@
   // Hardware SPI is on EXP2. See if you can make it work:
   // https://github.com/makerbase-mks/MKS-SBASE/issues/25
   #define TMC_USE_SW_SPI
-  #ifndef TMC_SPI_MOSI
-    #define TMC_SPI_MOSI                   P0_03  // AUX1
-  #endif
-  #ifndef TMC_SPI_MISO
-    #define TMC_SPI_MISO                   P0_02  // AUX1
-  #endif
-  #ifndef TMC_SPI_SCK
-    #define TMC_SPI_SCK                    P0_26  // TH4
+  #if ENABLED(TMC_USE_SW_SPI)
+    #ifndef TMC_SW_MOSI
+      #define TMC_SW_MOSI                  P0_03  // AUX1
+    #endif
+    #ifndef TMC_SW_MISO
+      #define TMC_SW_MISO                  P0_02  // AUX1
+    #endif
+    #ifndef TMC_SW_SCK
+      #define TMC_SW_SCK                   P0_26  // TH4
+    #endif
   #endif
 
 #endif
@@ -325,13 +331,10 @@
    */
   #define X_SERIAL_TX_PIN                  P1_22  // J8-2
   #define X_SERIAL_RX_PIN                  P2_12  // J8-4 Interrupt Capable
-
   #define Y_SERIAL_TX_PIN                  P1_23  // J8-3
   #define Y_SERIAL_RX_PIN                  P2_11  // J8-5 Interrupt Capable
-
   #define Z_SERIAL_TX_PIN                  P2_12  // J8-4
   #define Z_SERIAL_RX_PIN                  P0_25  // TH3
-
   #define E0_SERIAL_TX_PIN                 P4_28  // J8-6
   #define E0_SERIAL_RX_PIN                 P0_26  // TH4
 
@@ -340,8 +343,10 @@
 #endif
 
 // UNUSED
-//#define PIN_P0_02                        P0_02  // AUX1 (Interrupt Capable/ADC/Serial Port 0)
-//#define PIN_P0_03                        P0_03  // AUX1 (Interrupt Capable/ADC/Serial Port 0)
+#define PIN_P0_27                          P0_27  // EXP2/Onboard SD
+#define PIN_P0_28                          P0_28  // EXP2
+#define PIN_P0_02                          P0_02  // AUX1 (Interrupt Capable/ADC/Serial Port 0)
+#define PIN_P0_03                          P0_03  // AUX1 (Interrupt Capable/ADC/Serial Port 0)
 
 /**
  *  PWMs
@@ -359,9 +364,9 @@
  *  PWM1.4   P1_23   SDSS(SSEL0)      J3-5  AUX-3
  *  PWM1.4   P2_03   Z_STEP_PIN
  *  PWM1.5   P1_24   X_MIN_PIN        10K PULLUP TO 3.3v, 1K SERIES
- *  PWM1.5   P2_04   MOSFET_B_PIN
+ *  PWM1.5   P2_04   RAMPS_D9_PIN
  *  PWM1.6   P1_26   Y_MIN_PIN        10K PULLUP TO 3.3v, 1K SERIES
- *  PWM1.6   P2_05   MOSFET_A_PIN
+ *  PWM1.6   P2_05   RAMPS_D10_PIN
  */
 
 /**

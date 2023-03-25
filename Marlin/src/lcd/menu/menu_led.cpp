@@ -26,13 +26,9 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if HAS_MARLINUI_MENU && EITHER(LED_CONTROL_MENU, CASE_LIGHT_MENU)
+#if HAS_LCD_MENU && EITHER(LED_CONTROL_MENU, CASE_LIGHT_MENU)
 
 #include "menu_item.h"
-
-#if ENABLED(PSU_CONTROL)
-  #include "../../feature/power.h"
-#endif
 
 #if ENABLED(LED_CONTROL_MENU)
   #include "../../feature/leds/leds.h"
@@ -83,7 +79,7 @@
     START_MENU();
     BACK_ITEM(MSG_LED_CONTROL);
     #if ENABLED(NEOPIXEL2_SEPARATE)
-      STATIC_ITEM_N(1, MSG_LED_CHANNEL_N, SS_DEFAULT|SS_INVERT);
+      STATIC_ITEM_N(MSG_LED_CHANNEL_N, 1, SS_DEFAULT|SS_INVERT);
     #endif
     EDIT_ITEM(uint8, MSG_INTENSITY_R, &leds.color.r, 0, 255, leds.update, true);
     EDIT_ITEM(uint8, MSG_INTENSITY_G, &leds.color.g, 0, 255, leds.update, true);
@@ -95,7 +91,7 @@
       EDIT_ITEM(uint8, MSG_LED_BRIGHTNESS, &leds.color.i, 0, 255, leds.update, true);
     #endif
     #if ENABLED(NEOPIXEL2_SEPARATE)
-      STATIC_ITEM_N(2, MSG_LED_CHANNEL_N, SS_DEFAULT|SS_INVERT);
+      STATIC_ITEM_N(MSG_LED_CHANNEL_N, 2, SS_DEFAULT|SS_INVERT);
       EDIT_ITEM(uint8, MSG_INTENSITY_R, &leds2.color.r, 0, 255, leds2.update, true);
       EDIT_ITEM(uint8, MSG_INTENSITY_G, &leds2.color.g, 0, 255, leds2.update, true);
       EDIT_ITEM(uint8, MSG_INTENSITY_B, &leds2.color.b, 0, 255, leds2.update, true);
@@ -129,7 +125,12 @@ void menu_led() {
   BACK_ITEM(MSG_MAIN);
 
   #if ENABLED(LED_CONTROL_MENU)
-    if (TERN1(PSU_CONTROL, powerManager.psu_on)) {
+    #if ENABLED(PSU_CONTROL)
+      extern bool powersupply_on;
+    #else
+      constexpr bool powersupply_on = true;
+    #endif
+    if (powersupply_on) {
       editable.state = leds.lights_on;
       EDIT_ITEM(bool, MSG_LEDS, &editable.state, leds.toggle);
     }
@@ -169,4 +170,4 @@ void menu_led() {
   END_MENU();
 }
 
-#endif // HAS_MARLINUI_MENU && LED_CONTROL_MENU
+#endif // HAS_LCD_MENU && LED_CONTROL_MENU

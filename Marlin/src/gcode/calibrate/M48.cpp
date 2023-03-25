@@ -35,15 +35,11 @@
   #include "../../module/planner.h"
 #endif
 
-#if HAS_PTC
-  #include "../../feature/probe_temp_comp.h"
-#endif
-
 /**
  * M48: Z probe repeatability measurement function.
  *
  * Usage:
- *   M48 <P#> <X#> <Y#> <V#> <E> <L#> <S> <C#>
+ *   M48 <P#> <X#> <Y#> <V#> <E> <L#> <S>
  *     P = Number of sampled points (4-50, default 10)
  *     X = Sample X position
  *     Y = Sample Y position
@@ -51,7 +47,6 @@
  *     E = Engage Z probe for each reading
  *     L = Number of legs of movement before probe
  *     S = Schizoid (Or Star if you prefer)
- *     C = Enable probe temperature compensation (0 or 1, default 1)
  *
  * This function requires the machine to be homed before invocation.
  */
@@ -84,7 +79,7 @@ void GcodeSuite::M48() {
   };
 
   if (!probe.can_reach(test_position)) {
-    ui.set_status(GET_TEXT_F(MSG_M48_OUT_OF_BOUNDS), 99);
+    ui.set_status_P(GET_TEXT(MSG_M48_OUT_OF_BOUNDS), 99);
     SERIAL_ECHOLNPGM("? (X,Y) out of bounds.");
     return;
   }
@@ -111,8 +106,6 @@ void GcodeSuite::M48() {
     const bool was_enabled = planner.leveling_active;
     set_bed_leveling_enabled(false);
   #endif
-
-  TERN_(HAS_PTC, ptc.set_enabled(parser.boolval('C', true)));
 
   // Work with reasonable feedrates
   remember_feedrate_scaling_off();
@@ -151,7 +144,7 @@ void GcodeSuite::M48() {
     LOOP_L_N(n, n_samples) {
       #if HAS_STATUS_MESSAGE
         // Display M48 progress in the status bar
-        ui.status_printf(0, F(S_FMT ": %d/%d"), GET_TEXT(MSG_M48_POINT), int(n + 1), int(n_samples));
+        ui.status_printf_P(0, PSTR(S_FMT ": %d/%d"), GET_TEXT(MSG_M48_POINT), int(n + 1), int(n_samples));
       #endif
 
       // When there are "legs" of movement move around the point before probing
@@ -162,14 +155,14 @@ void GcodeSuite::M48() {
         float angle = random(0, 360);
         const float radius = random(
           #if ENABLED(DELTA)
-            int(0.1250000000 * (PRINTABLE_RADIUS)),
-            int(0.3333333333 * (PRINTABLE_RADIUS))
+            int(0.1250000000 * (DELTA_PRINTABLE_RADIUS)),
+            int(0.3333333333 * (DELTA_PRINTABLE_RADIUS))
           #else
             int(5), int(0.125 * _MIN(X_BED_SIZE, Y_BED_SIZE))
           #endif
         );
         if (verbose_level > 3) {
-          SERIAL_ECHOPGM("Start radius:", radius, " angle:", angle, " dir:");
+          SERIAL_ECHOPAIR("Start radius:", radius, " angle:", angle, " dir:");
           if (dir > 0) SERIAL_CHAR('C');
           SERIAL_ECHOLNPGM("CW");
         }
@@ -207,7 +200,7 @@ void GcodeSuite::M48() {
             while (!probe.can_reach(next_pos)) {
               next_pos *= 0.8f;
               if (verbose_level > 3)
-                SERIAL_ECHOLNPGM_P(PSTR("Moving inward: X"), next_pos.x, SP_Y_STR, next_pos.y);
+                SERIAL_ECHOLNPAIR_P(PSTR("Moving inward: X"), next_pos.x, SP_Y_STR, next_pos.y);
             }
           #elif HAS_ENDSTOPS
             // For a rectangular bed just keep the probe in bounds
@@ -216,7 +209,7 @@ void GcodeSuite::M48() {
           #endif
 
           if (verbose_level > 3)
-            SERIAL_ECHOLNPGM_P(PSTR("Going to: X"), next_pos.x, SP_Y_STR, next_pos.y);
+            SERIAL_ECHOLNPAIR_P(PSTR("Going to: X"), next_pos.x, SP_Y_STR, next_pos.y);
 
           do_blocking_move_to_xy(next_pos);
         } // n_legs loop
@@ -248,7 +241,7 @@ void GcodeSuite::M48() {
 
       if (verbose_level > 1) {
         SERIAL_ECHO(n + 1);
-        SERIAL_ECHOPGM(" of ", n_samples);
+        SERIAL_ECHOPAIR(" of ", n_samples);
         SERIAL_ECHOPAIR_F(": z: ", pz, 3);
         SERIAL_CHAR(' ');
         dev_report(verbose_level > 2, mean, sigma, min, max);
@@ -267,7 +260,7 @@ void GcodeSuite::M48() {
     #if HAS_STATUS_MESSAGE
       // Display M48 results in the status bar
       char sigma_str[8];
-      ui.status_printf(0, F(S_FMT ": %s"), GET_TEXT(MSG_M48_DEVIATION), dtostrf(sigma, 2, 6, sigma_str));
+      ui.status_printf_P(0, PSTR(S_FMT ": %s"), GET_TEXT(MSG_M48_DEVIATION), dtostrf(sigma, 2, 6, sigma_str));
     #endif
   }
 
@@ -275,9 +268,6 @@ void GcodeSuite::M48() {
 
   // Re-enable bed level correction if it had been on
   TERN_(HAS_LEVELING, set_bed_leveling_enabled(was_enabled));
-
-  // Re-enable probe temperature correction
-  TERN_(HAS_PTC, ptc.set_enabled(true));
 
   report_current_position();
 }

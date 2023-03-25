@@ -23,7 +23,6 @@
 
 /**
  * CNControls V15 for HMS434 pin assignments
- * ATmega2560, ATmega1280
  */
 
 #define ALLOW_MEGA1280

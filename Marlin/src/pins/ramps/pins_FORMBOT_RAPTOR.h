@@ -23,14 +23,13 @@
 
 /**
  * Formbot Raptor pin assignments
- * ATmega2560
  */
 
 #define REQUIRE_MEGA2560
 #include "env_validate.h"
 
 #if HOTENDS > 3 || E_STEPPERS > 3
-  #error "Formbot supports up to 3 hotends / E steppers."
+  #error "Formbot supports up to 3 hotends / E-steppers. Comment out this line to continue."
 #endif
 
 #ifndef BOARD_INFO_NAME
@@ -120,6 +119,23 @@
   #define TEMP_0_CS_PIN                       66  // Don't use 53 if using Display/SD card
 #else
   #define TEMP_0_CS_PIN                       66  // Don't use 49 (SD_DETECT_PIN)
+#endif
+
+//
+// Augmentation for auto-assigning RAMPS plugs
+//
+#if NONE(IS_RAMPS_EEB, IS_RAMPS_EEF, IS_RAMPS_EFB, IS_RAMPS_EFF, IS_RAMPS_SF) && !PIN_EXISTS(MOSFET_D)
+  #if HAS_MULTI_HOTEND
+    #if TEMP_SENSOR_BED
+      #define IS_RAMPS_EEB
+    #else
+      #define IS_RAMPS_EEF
+    #endif
+  #elif TEMP_SENSOR_BED
+    #define IS_RAMPS_EFB
+  #else
+    #define IS_RAMPS_EFF
+  #endif
 #endif
 
 //

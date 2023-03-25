@@ -19,7 +19,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
 #include "../../../inc/MarlinConfigPre.h"
 
 #if HAS_TFT_LVGL_UI
@@ -45,7 +44,7 @@
   #if PIN_EXISTS(MT_DET_2)
     bool mt_det2_sta;
   #endif
-  #if X_HOME_DIR
+  #if HAS_X_MIN || HAS_X_MAX
     bool endstopx1_sta;
   #else
     constexpr static bool endstopx1_sta = true;
@@ -55,7 +54,7 @@
   #else
     constexpr static bool endstopx2_sta = true;
   #endif
-  #if HAS_Y_AXIS && Y_HOME_DIR
+  #if HAS_Y_MIN || HAS_Y_MAX
     bool endstopy1_sta;
   #else
     constexpr static bool endstopy1_sta = true;
@@ -65,7 +64,7 @@
   #else
     constexpr static bool endstopy2_sta = true;
   #endif
-  #if HAS_Z_AXIS && Z_HOME_DIR
+  #if HAS_Z_MIN || HAS_Z_MAX
     bool endstopz1_sta;
   #else
     constexpr static bool endstopz1_sta = true;
@@ -160,8 +159,6 @@
     #endif
   }
 
-  #include "../../../libs/buzzer.h"
-
   void init_test_gpio() {
     endstops.init();
 
@@ -203,7 +200,12 @@
     #endif
   }
 
-  void mks_test_beeper() { buzzer.click(100); }
+  void mks_test_beeper() {
+    WRITE(BEEPER_PIN, HIGH);
+    delay(100);
+    WRITE(BEEPER_PIN, LOW);
+    delay(100);
+  }
 
   #if ENABLED(SDSUPPORT)
 
@@ -269,7 +271,7 @@
         #if HAS_Y_AXIS
           WRITE(Y_DIR_PIN, HIGH);
         #endif
-        #if HAS_Z_AXIS
+        #if HAS_Y_AXIS
           WRITE(Z_DIR_PIN, HIGH);
         #endif
         #if HAS_EXTRUDERS
@@ -694,40 +696,32 @@ void disp_char_1624(uint16_t x, uint16_t y, uint8_t c, uint16_t charColor, uint1
   }
 }
 
-void disp_string(uint16_t x, uint16_t y, const char * cstr, uint16_t charColor, uint16_t bkColor) {
-  for (char c; (c = *cstr); cstr++, x += 16)
-    disp_char_1624(x, y, c, charColor, bkColor);
-}
-
-void disp_string(uint16_t x, uint16_t y, FSTR_P const fstr, uint16_t charColor, uint16_t bkColor) {
-  PGM_P pstr = FTOP(fstr);
-  for (char c; (c = pgm_read_byte(pstr)); pstr++, x += 16)
-    disp_char_1624(x, y, c, charColor, bkColor);
+void disp_string(uint16_t x, uint16_t y, const char * string, uint16_t charColor, uint16_t bkColor) {
+  while (*string != '\0') {
+    disp_char_1624(x, y, *string, charColor, bkColor);
+    string++;
+    x += 16;
+  }
 }
 
 void disp_assets_update() {
   SPI_TFT.LCD_clear(0x0000);
-  disp_string(100, 140, F("Assets Updating..."), 0xFFFF, 0x0000);
+  disp_string(100, 140, "Assets Updating...", 0xFFFF, 0x0000);
 }
 
-void disp_assets_update_progress(FSTR_P const fmsg) {
-  #ifdef __AVR__
-    static constexpr int buflen = 30;
-    char buf[buflen];
-    memset(buf, ' ', buflen);
-    strncpy_P(buf, FTOP(fmsg), buflen - 1);
-    buf[buflen - 1] = '\0';
-    disp_string(100, 165, buf, 0xFFFF, 0x0000);
-  #else
-    disp_string(100, 165, FTOP(fmsg), 0xFFFF, 0x0000);
-  #endif
+void disp_assets_update_progress(const char *msg) {
+  char buf[30];
+  memset(buf, ' ', COUNT(buf));
+  strncpy(buf, msg, strlen(msg));
+  buf[COUNT(buf)-1] = '\0';
+  disp_string(100, 165, buf, 0xFFFF, 0x0000);
 }
 
 #if BOTH(MKS_TEST, SDSUPPORT)
   uint8_t mks_test_flag = 0;
   const char *MKSTestPath = "MKS_TEST";
   void mks_test_get() {
-    MediaFile dir, root = card.getroot();
+    SdFile dir, root = card.getroot();
     if (dir.open(&root, MKSTestPath, O_RDONLY))
       mks_test_flag = 0x1E;
   }
