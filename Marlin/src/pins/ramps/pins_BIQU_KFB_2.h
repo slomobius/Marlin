@@ -23,11 +23,10 @@
 
 /**
  * KFB 2.0 – Arduino Mega2560 with RAMPS v1.4 pin assignments
- * ATmega2560
  */
 
 #if HOTENDS > 2 || E_STEPPERS > 2
-  #error "KFB 2.0 supports up to 2 hotends / E steppers."
+  #error "KFB 2.0 supports up to 2 hotends / E-steppers. Comment out this line to continue."
 #endif
 
 #define BOARD_INFO_NAME "KFB 2.0"

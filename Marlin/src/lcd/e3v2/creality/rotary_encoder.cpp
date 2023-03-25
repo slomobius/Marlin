@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -21,29 +21,24 @@
  */
 
 /*****************************************************************************
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
  * @file     lcd/e3v2/creality/rotary_encoder.cpp
  * @author   LEO / Creality3D
  * @date     2019/07/06
  * @version  2.0.1
-========
- * @file     lcd/e3v2/common/encoder.cpp
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
  * @brief    Rotary encoder functions
  *****************************************************************************/
 
 #include "../../../inc/MarlinConfigPre.h"
 
-#if HAS_DWIN_E3V2
+#if ENABLED(DWIN_CREALITY_LCD)
 
-#include "encoder.h"
+#include "rotary_encoder.h"
 #include "../../buttons.h"
 
 #include "../../../MarlinCore.h"
-#include "../../marlinui.h"
 #include "../../../HAL/shared/Delay.h"
 
-#if HAS_SOUND
+#if HAS_BUZZER
   #include "../../../libs/buzzer.h"
 #endif
 
@@ -55,9 +50,13 @@
 
 ENCODER_Rate EncoderRate;
 
-// TODO: Replace with ui.quick_feedback
+// Buzzer
 void Encoder_tick() {
-  TERN_(HAS_BEEPER, if (ui.sound_on) buzzer.click(10));
+  #if PIN_EXISTS(BEEPER)
+    WRITE(BEEPER_PIN, HIGH);
+    delay(10);
+    WRITE(BEEPER_PIN, LOW);
+  #endif
 }
 
 // Encoder initialization
@@ -71,19 +70,19 @@ void Encoder_Configuration() {
   #if BUTTON_EXISTS(ENC)
     SET_INPUT_PULLUP(BTN_ENC);
   #endif
-  #if HAS_BEEPER
-    SET_OUTPUT(BEEPER_PIN);     // TODO: Use buzzer.h which already inits this
+  #if PIN_EXISTS(BEEPER)
+    SET_OUTPUT(BEEPER_PIN);
   #endif
 }
 
 // Analyze encoder value and return state
-EncoderState Encoder_ReceiveAnalyze() {
+ENCODER_DiffState Encoder_ReceiveAnalyze() {
   const millis_t now = millis();
   static uint8_t lastEncoderBits;
   uint8_t newbutton = 0;
   static signed char temp_diff = 0;
 
-  EncoderState temp_diffState = ENCODER_DIFF_NO;
+  ENCODER_DiffState temp_diffState = ENCODER_DIFF_NO;
   if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
   if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
   if (BUTTON_PRESSED(ENC)) {
@@ -94,7 +93,6 @@ EncoderState Encoder_ReceiveAnalyze() {
       #if PIN_EXISTS(LCD_LED)
         //LED_Action();
       #endif
-      if (!ui.backlight) ui.refresh_brightness();
       const bool was_waiting = wait_for_user;
       wait_for_user = false;
       return was_waiting ? ENCODER_DIFF_NO : ENCODER_DIFF_ENTER;
@@ -103,34 +101,29 @@ EncoderState Encoder_ReceiveAnalyze() {
   }
   if (newbutton != lastEncoderBits) {
     switch (newbutton) {
-      case 0:
-             if (lastEncoderBits == 1) temp_diff++;
-        else if (lastEncoderBits == 2) temp_diff--;
+      case ENCODER_PHASE_0:
+             if (lastEncoderBits == ENCODER_PHASE_3) temp_diff++;
+        else if (lastEncoderBits == ENCODER_PHASE_1) temp_diff--;
         break;
-      case 2:
-             if (lastEncoderBits == 0) temp_diff++;
-        else if (lastEncoderBits == 3) temp_diff--;
+      case ENCODER_PHASE_1:
+             if (lastEncoderBits == ENCODER_PHASE_0) temp_diff++;
+        else if (lastEncoderBits == ENCODER_PHASE_2) temp_diff--;
         break;
-      case 3:
-             if (lastEncoderBits == 2) temp_diff++;
-        else if (lastEncoderBits == 1) temp_diff--;
+      case ENCODER_PHASE_2:
+             if (lastEncoderBits == ENCODER_PHASE_1) temp_diff++;
+        else if (lastEncoderBits == ENCODER_PHASE_3) temp_diff--;
         break;
-      case 1:
-             if (lastEncoderBits == 3) temp_diff++;
-        else if (lastEncoderBits == 0) temp_diff--;
+      case ENCODER_PHASE_3:
+             if (lastEncoderBits == ENCODER_PHASE_2) temp_diff++;
+        else if (lastEncoderBits == ENCODER_PHASE_0) temp_diff--;
         break;
     }
     lastEncoderBits = newbutton;
   }
 
   if (ABS(temp_diff) >= ENCODER_PULSES_PER_STEP) {
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
     if (temp_diff > 0) temp_diffState = ENCODER_DIFF_CW;
     else temp_diffState = ENCODER_DIFF_CCW;
-========
-    if (temp_diff > 0) temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CCW, ENCODER_DIFF_CW);
-    else temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CW, ENCODER_DIFF_CCW);
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
 
     #if ENABLED(ENCODER_RATE_MULTIPLIER)
 
@@ -147,9 +140,7 @@ EncoderState Encoder_ReceiveAnalyze() {
           const float encoderStepRate = encoderMovementSteps / float(ms - EncoderRate.lastEncoderTime) * 1000;
                if (encoderStepRate >= ENCODER_100X_STEPS_PER_SEC) encoderMultiplier = 100;
           else if (encoderStepRate >= ENCODER_10X_STEPS_PER_SEC)  encoderMultiplier = 10;
-          #if ENCODER_5X_STEPS_PER_SEC
-            else if (encoderStepRate >= ENCODER_5X_STEPS_PER_SEC) encoderMultiplier = 5;
-          #endif
+          else if (encoderStepRate >= ENCODER_5X_STEPS_PER_SEC)   encoderMultiplier = 5;
         }
         EncoderRate.lastEncoderTime = ms;
       }
@@ -262,4 +253,4 @@ EncoderState Encoder_ReceiveAnalyze() {
 
 #endif // LCD_LED
 
-#endif // HAS_DWIN_E3V2
+#endif // DWIN_CREALITY_LCD

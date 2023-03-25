@@ -28,7 +28,7 @@
 #include "env_validate.h"
 
 #if HOTENDS > 3 || E_STEPPERS > 3
-  #error "MKS Robin pro supports up to 3 hotends / E steppers."
+  #error "MKS Robin pro supports up to 3 hotends / E-steppers. Comment out this line to continue."
 #endif
 
 #define BOARD_INFO_NAME "MKS Robin pro"
@@ -105,16 +105,18 @@
   #define E2_CS_PIN                         PG9
 #endif
 //
-// SPI pins for TMC2130 stepper drivers
+// Software SPI pins for TMC2130 stepper drivers
 //
-#ifndef TMC_SPI_MOSI
-  #define TMC_SPI_MOSI                      PB15
-#endif
-#ifndef TMC_SPI_MISO
-  #define TMC_SPI_MISO                      PB14
-#endif
-#ifndef TMC_SPI_SCK
-  #define TMC_SPI_SCK                       PB13
+#if ENABLED(TMC_USE_SW_SPI)
+  #ifndef TMC_SW_MOSI
+    #define TMC_SW_MOSI                     PB15
+  #endif
+  #ifndef TMC_SW_MISO
+    #define TMC_SW_MISO                     PB14
+  #endif
+  #ifndef TMC_SW_SCK
+    #define TMC_SW_SCK                      PB13
+  #endif
 #endif
 
 #if HAS_TMC_UART
@@ -131,6 +133,9 @@
   //#define E1_HARDWARE_SERIAL MSerial1
   //#define E2_HARDWARE_SERIAL MSerial1
 
+  //
+  // Software serial
+  //
   #define X_SERIAL_TX_PIN                   PF7
   #define X_SERIAL_RX_PIN                   PF8
 
@@ -181,19 +186,20 @@
 //
 // Power Supply Control
 //
-#if ENABLED(MKS_PWC)
-  #if ENABLED(TFT_LVGL_UI)
-    #if ENABLED(PSU_CONTROL)
-      #error "PSU_CONTROL is incompatible with MKS_PWC plus TFT_LVGL_UI."
-    #endif
-    #undef MKS_PWC
-    #define SUICIDE_PIN                     PG11
-    #define SUICIDE_PIN_STATE               LOW
-  #else
-    #define PS_ON_PIN                       PG11  // PW_OFF
+#if ENABLED(PSU_CONTROL)                          // MKSPWC
+  #if HAS_TFT_LVGL_UI
+    #error "PSU_CONTROL cannot be used with TFT_LVGL_UI. Disable PSU_CONTROL to continue."
   #endif
-  #define KILL_PIN                          PA2
-  #define KILL_PIN_STATE                    HIGH
+  #ifndef PS_ON_PIN
+    #define PS_ON_PIN                       PG11  // SUICIDE
+  #endif
+  #ifndef KILL_PIN
+    #define KILL_PIN                        PA2
+    #define KILL_PIN_STATE                  HIGH
+  #endif
+#else
+  #define SUICIDE_PIN                       PG11
+  #define SUICIDE_PIN_INVERTING            false
 #endif
 
 //
@@ -237,7 +243,7 @@
   #define TFT_CS_PIN                 FSMC_CS_PIN
   #define TFT_RS_PIN                 FSMC_RS_PIN
 
-  #define LCD_RESET_PIN                     PC6
+  #define LCD_RESET_PIN                     PF6
   #define LCD_BACKLIGHT_PIN                 PD13
 
   #define TFT_BUFFER_SIZE                  14400
@@ -299,18 +305,21 @@
 
 #endif
 
-// Alter timing for graphical display
-#if IS_U8GLIB_ST7920
-  #define BOARD_ST7920_DELAY_1               125
-  #define BOARD_ST7920_DELAY_2               125
-  #define BOARD_ST7920_DELAY_3               125
+#ifndef BOARD_ST7920_DELAY_1
+  #define BOARD_ST7920_DELAY_1              DELAY_NS(125)
+#endif
+#ifndef BOARD_ST7920_DELAY_2
+  #define BOARD_ST7920_DELAY_2              DELAY_NS(125)
+#endif
+#ifndef BOARD_ST7920_DELAY_3
+  #define BOARD_ST7920_DELAY_3              DELAY_NS(125)
 #endif
 
-#define SPI_FLASH
-#if ENABLED(SPI_FLASH)
+#define HAS_SPI_FLASH                          1
+#if HAS_SPI_FLASH
   #define SPI_FLASH_SIZE               0x1000000  // 16MB
-  #define SPI_FLASH_CS_PIN                  PB12  // Flash chip-select
-  #define SPI_FLASH_MOSI_PIN                PB15
-  #define SPI_FLASH_MISO_PIN                PB14
-  #define SPI_FLASH_SCK_PIN                 PB13
+  #define W25QXX_CS_PIN                     PB12  // Flash chip-select
+  #define W25QXX_MOSI_PIN                   PB15
+  #define W25QXX_MISO_PIN                   PB14
+  #define W25QXX_SCK_PIN                    PB13
 #endif

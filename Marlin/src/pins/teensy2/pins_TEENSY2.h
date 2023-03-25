@@ -109,7 +109,6 @@
 
 #include "env_validate.h"
 
-// https://reprap.org/wiki/Teensy_Breadboard
 #define BOARD_INFO_NAME "Teensy++2.0"
 
 //

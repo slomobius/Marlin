@@ -39,9 +39,6 @@ void LockScreen::onEntry() {
   BaseScreen::onEntry();
 }
 
-#define GRID_COLS 1
-#define GRID_ROWS TERN(TOUCH_UI_PORTRAIT, 10, 7)
-
 void LockScreen::onRedraw(draw_mode_t what) {
   CommandProcessor cmd;
 
@@ -53,12 +50,20 @@ void LockScreen::onRedraw(draw_mode_t what) {
   }
 
   if (what & FOREGROUND) {
+    #if ENABLED(TOUCH_UI_PORTRAIT)
+      #define GRID_COLS 1
+      #define GRID_ROWS 10
+    #else
+      #define GRID_COLS 1
+      #define GRID_ROWS 7
+    #endif
+
     #undef MARGIN_T
     #undef MARGIN_B
     #define MARGIN_T 3
     #define MARGIN_B 3
 
-    FSTR_P message;
+    progmem_str message;
     switch (message_style()) {
       case 'w':
         message = GET_TEXT_F(MSG_PASSCODE_REJECTED);
@@ -103,6 +108,9 @@ void LockScreen::onRedraw(draw_mode_t what) {
     #undef MARGIN_B
     #define MARGIN_T MARGIN_DEFAULT
     #define MARGIN_B MARGIN_DEFAULT
+
+    #undef GRID_COLS
+    #undef GRID_ROWS
   }
 }
 

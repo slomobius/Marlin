@@ -53,45 +53,42 @@ void WifiSerial::init(PinName _rx, PinName _tx) {
 WifiSerial::WifiSerial(void *peripheral) {
   // If PIN_SERIALy_RX is not defined assume half-duplex
   _serial.pin_rx = NC;
-  if (false) {
-    // for else if / else below...
-  }
   // If Serial is defined in variant set
   // the Rx/Tx pins for com port if defined
   #if defined(Serial) && defined(PIN_SERIAL_TX)
-    else if ((void *)this == (void *)&Serial) {
+    if ((void *)this == (void *)&Serial) {
       #ifdef PIN_SERIAL_RX
         setRx(PIN_SERIAL_RX);
       #endif
       setTx(PIN_SERIAL_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIAL1_TX) && defined(USART1_BASE)
-    else if (peripheral == USART1) {
+    if (peripheral == USART1) {
       #ifdef PIN_SERIAL1_RX
         setRx(PIN_SERIAL1_RX);
       #endif
       setTx(PIN_SERIAL1_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIAL2_TX) && defined(USART2_BASE)
-    else if (peripheral == USART2) {
+    if (peripheral == USART2) {
       #ifdef PIN_SERIAL2_RX
         setRx(PIN_SERIAL2_RX);
       #endif
       setTx(PIN_SERIAL2_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIAL3_TX) && defined(USART3_BASE)
-    else if (peripheral == USART3) {
+    if (peripheral == USART3) {
       #ifdef PIN_SERIAL3_RX
         setRx(PIN_SERIAL3_RX);
       #endif
       setTx(PIN_SERIAL3_TX);
-    }
+    } else
   #endif
   #ifdef PIN_SERIAL4_TX
-    else if (false
+    if (false
       #ifdef USART4_BASE
         || peripheral == USART4
       #elif defined(UART4_BASE)
@@ -102,10 +99,10 @@ WifiSerial::WifiSerial(void *peripheral) {
         setRx(PIN_SERIAL4_RX);
       #endif
       setTx(PIN_SERIAL4_TX);
-    }
+    } else
   #endif
   #ifdef PIN_SERIAL5_TX
-    else if (false
+    if (false
       #ifdef USART5_BASE
         || peripheral == USART5
       #elif defined(UART5_BASE)
@@ -116,18 +113,18 @@ WifiSerial::WifiSerial(void *peripheral) {
         setRx(PIN_SERIAL5_RX);
       #endif
       setTx(PIN_SERIAL5_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIAL6_TX) && defined(USART6_BASE)
-    else if (peripheral == USART6) {
+    if (peripheral == USART6) {
       #ifdef PIN_SERIAL6_RX
         setRx(PIN_SERIAL6_RX);
       #endif
         setTx(PIN_SERIAL6_TX);
-    }
+    } else
   #endif
   #ifdef PIN_SERIAL7_TX
-    else if (false
+    if (false
       #ifdef USART7_BASE
         || peripheral == USART7
       #elif defined(UART7_BASE)
@@ -138,10 +135,10 @@ WifiSerial::WifiSerial(void *peripheral) {
         setRx(PIN_SERIAL7_RX);
       #endif
       setTx(PIN_SERIAL7_TX);
-    }
+    } else
   #endif
   #ifdef PIN_SERIAL8_TX
-    else if (false
+    if (false
       #ifdef USART8_BASE
         || peripheral == USART8
       #elif defined(UART8_BASE)
@@ -152,18 +149,18 @@ WifiSerial::WifiSerial(void *peripheral) {
         setRx(PIN_SERIAL8_RX);
       #endif
       setTx(PIN_SERIAL8_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIAL9_TX) && defined(UART9_BASE)
-    else if (peripheral == UART9) {
+    if (peripheral == UART9) {
       #ifdef PIN_SERIAL9_RX
         setRx(PIN_SERIAL9_RX);
       #endif
       setTx(PIN_SERIAL9_TX);
-    }
+    } else
   #endif
   #ifdef PIN_SERIAL10_TX
-    else if (false
+    if (false
       #ifdef USART10_BASE
         || peripheral == USART10
       #elif defined(UART10_BASE)
@@ -174,18 +171,18 @@ WifiSerial::WifiSerial(void *peripheral) {
         setRx(PIN_SERIAL10_RX);
       #endif
       setTx(PIN_SERIAL10_TX);
-    }
+    } else
   #endif
   #if defined(PIN_SERIALLP1_TX) && defined(LPUART1_BASE)
-    else if (peripheral == LPUART1) {
+    if (peripheral == LPUART1) {
       #ifdef PIN_SERIALLP1_RX
         setRx(PIN_SERIALLP1_RX);
       #endif
       setTx(PIN_SERIALLP1_TX);
-    }
+    } else
   #endif
   // else get the pins of the first peripheral occurrence in PinMap
-  else {
+  {
     _serial.pin_rx = pinmap_pin(peripheral, PinMap_UART_RX);
     _serial.pin_tx = pinmap_pin(peripheral, PinMap_UART_TX);
   }
@@ -230,7 +227,7 @@ void WifiSerial::_rx_complete_irq(serial_t *obj) {
 
     WRITE(WIFI_IO1_PIN, HIGH);
 
-    rx_buffer_index_t i = uint16_t(obj->rx_head + 1) % WIFI_RX_BUF_SIZE;
+    rx_buffer_index_t i = (unsigned int)(obj->rx_head + 1) % WIFI_RX_BUF_SIZE;
 
     // if we should be storing the received character into the location
     // just before the tail (meaning that the head would advance to the
@@ -292,7 +289,7 @@ void WifiSerial::begin(unsigned long baud, byte config) {
     case 0: Error_Handler(); break;
   }
 
-  uart_init(&_serial, uint32_t(baud), databits, parity, stopbits);
+  uart_init(&_serial, (uint32_t)baud, databits, parity, stopbits);
   enableHalfDuplexRx();
   if (baud == WIFI_BAUDRATE)
     uart_attach_rx_callback(&_serial, _rx_complete_irq);
@@ -311,7 +308,7 @@ void WifiSerial::end() {
 }
 
 int WifiSerial::available() {
-  return uint16_t(WIFI_RX_BUF_SIZE + _serial.rx_head - _serial.rx_tail) % WIFI_RX_BUF_SIZE;
+  return ((unsigned int)(WIFI_RX_BUF_SIZE + _serial.rx_head - _serial.rx_tail)) % WIFI_RX_BUF_SIZE;
 }
 
 //
@@ -322,7 +319,7 @@ int WifiSerial::read() {
   // if the head isn't ahead of the tail, we don't have any characters
   if (_serial.rx_head == _serial.rx_tail) return -1;
 
-  uint8_t c = _serial.rx_buff[_serial.rx_tail];
+  unsigned char c = _serial.rx_buff[_serial.rx_tail];
   _serial.rx_tail = (rx_buffer_index_t)(_serial.rx_tail + 1) % WIFI_RX_BUF_SIZE;
   return c;
 }

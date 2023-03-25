@@ -54,7 +54,7 @@
 
 #include "exception_hook.h"
 #include "../backtrace/backtrace.h"
-#include "../MinSerial.h"
+#include "../HAL_MinSerial.h"
 
 #define HW_REG(X)  (*((volatile unsigned long *)(X)))
 
@@ -101,7 +101,7 @@ struct __attribute__((packed)) ContextSavedFrame {
   uint32_t ELR;
 };
 
-#if NONE(STM32F0xx, STM32G0xx)
+#if DISABLED(STM32F0xx)
   extern "C"
   __attribute__((naked)) void CommonHandler_ASM() {
     __asm__ __volatile__ (
@@ -221,7 +221,7 @@ bool resume_from_fault() {
   // So we'll just need to refresh the watchdog for a while and then stop for the system to reboot
   uint32_t last = start;
   while (PENDING(last, end)) {
-    hal.watchdog_refresh();
+    watchdog_refresh();
     while (millis() == last) { /* nada */ }
     last = millis();
     MinSerial::TX('.');

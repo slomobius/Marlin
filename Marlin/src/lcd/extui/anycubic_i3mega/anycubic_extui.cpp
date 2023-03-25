@@ -37,12 +37,14 @@ namespace ExtUI {
 
   void onStartup()        { AnycubicTFT.OnSetup(); }
   void onIdle()           { AnycubicTFT.OnCommandScan(); }
-  void onPrinterKilled(FSTR_P const error, FSTR_P const component) { AnycubicTFT.OnKillTFT(); }
+  void onPrinterKilled(PGM_P const error, PGM_P const component) { AnycubicTFT.OnKillTFT(); }
   void onMediaInserted()  { AnycubicTFT.OnSDCardStateChange(true); }
   void onMediaError()     { AnycubicTFT.OnSDCardError(); }
   void onMediaRemoved()   { AnycubicTFT.OnSDCardStateChange(false); }
   void onPlayTone(const uint16_t frequency, const uint16_t duration) {
-    TERN_(SPEAKER, ::tone(BEEPER_PIN, frequency, duration));
+    #if ENABLED(SPEAKER)
+      ::tone(BEEPER_PIN, frequency, duration);
+    #endif
   }
   void onPrintTimerStarted()  { AnycubicTFT.OnPrintTimerStarted(); }
   void onPrintTimerPaused()   { AnycubicTFT.OnPrintTimerPaused(); }
@@ -52,8 +54,8 @@ namespace ExtUI {
   void onStatusChanged(const char * const msg) {}
 
   void onHomingStart() {}
-  void onHomingDone() {}
-  void onPrintDone() {}
+  void onHomingComplete() {}
+  void onPrintFinished() {}
 
   void onFactoryReset() {}
 
@@ -81,20 +83,19 @@ namespace ExtUI {
     // Called after loading or resetting stored settings
   }
 
-  void onSettingsStored(const bool success) {
+  void onConfigurationStoreWritten(bool success) {
     // Called after the entire EEPROM has been written,
     // whether successful or not.
   }
 
-  void onSettingsLoaded(const bool success) {
+  void onConfigurationStoreRead(bool success) {
     // Called after the entire EEPROM has been read,
     // whether successful or not.
   }
 
   #if HAS_MESH
 
-    void onLevelingStart() {}
-    void onLevelingDone() {}
+    void onMeshLevelingStart() {}
 
     void onMeshUpdate(const int8_t xpos, const int8_t ypos, const_float_t zval) {
       // Called when any mesh points are updated
@@ -106,12 +107,6 @@ namespace ExtUI {
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
-    void onSetPowerLoss(const bool onoff) {
-      // Called when power-loss is enabled/disabled
-    }
-    void onPowerLoss() {
-      // Called when power-loss state is detected
-    }
     void onPowerLossResume() {
       // Called on resume from power-loss
     }
