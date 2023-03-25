@@ -24,9 +24,7 @@
 /**
  * Cheaptronic v2.0 pin assignments
  * Built and sold by Michal Dyntar - RRO
- *          www.reprapobchod.cz (DOES NOT EXIST ANYMORE)
- *          https://web.archive.org/web/20190306201523/http://reprapobchod.cz/
- * ATmega2560
+ *          www.reprapobchod.cz
  */
 
 #include "env_validate.h"

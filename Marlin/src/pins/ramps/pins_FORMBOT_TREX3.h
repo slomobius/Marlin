@@ -22,15 +22,14 @@
 #pragma once
 
 /**
- * Formbot T-Rex 3 pin assignments
- * ATmega2560
+ * Formbot pin assignments
  */
 
 #define REQUIRE_MEGA2560
 #include "env_validate.h"
 
 #if HOTENDS > 2 || E_STEPPERS > 2
-  #error "Formbot supports up to 2 hotends / E steppers."
+  #error "Formbot supports up to 2 hotends / E-steppers. Comment out this line to continue."
 #endif
 
 #define BOARD_INFO_NAME      "Formbot"
@@ -101,15 +100,9 @@
   #define E1_CS_PIN                           44
 #endif
 
-#if HAS_X2_STEPPER
-  #define X2_STEP_PIN                         42
-  #define X2_DIR_PIN                          43
-  #define X2_ENABLE_PIN                       44
-#else
-  #define E2_STEP_PIN                         42
-  #define E2_DIR_PIN                          43
-  #define E2_ENABLE_PIN                       44
-#endif
+#define E2_STEP_PIN                           42
+#define E2_DIR_PIN                            43
+#define E2_ENABLE_PIN                         44
 
 //
 // Temperature Sensors
@@ -135,6 +128,7 @@
 #define FAN_PIN                                9
 #define FAN1_PIN                              12
 
+#define NUM_RUNOUT_SENSORS                     2
 #define FIL_RUNOUT_PIN                        22
 #define FIL_RUNOUT2_PIN                       21
 
@@ -179,10 +173,4 @@
   #ifndef BEEPER_PIN
     #define BEEPER_PIN                        37
   #endif
-#endif
-
-#if HAS_MARLINUI_U8GLIB
-  #define BOARD_ST7920_DELAY_1               125
-  #define BOARD_ST7920_DELAY_2               125
-  #define BOARD_ST7920_DELAY_3               125
 #endif

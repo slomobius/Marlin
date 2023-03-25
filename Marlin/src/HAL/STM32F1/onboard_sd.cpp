@@ -38,13 +38,8 @@
   #define SPI_CLOCK_MAX SPI_BAUD_PCLK_DIV_2
 #endif
 
-#if PIN_EXISTS(ONBOARD_SD_CS) && ONBOARD_SD_CS_PIN != SD_SS_PIN
-  #define CS_LOW()  WRITE(ONBOARD_SD_CS_PIN, LOW)  // Set OnboardSPI cs low
-  #define CS_HIGH() WRITE(ONBOARD_SD_CS_PIN, HIGH) // Set OnboardSPI cs high
-#else
-  #define CS_LOW()
-  #define CS_HIGH()
-#endif
+#define CS_LOW()  WRITE(ONBOARD_SD_CS_PIN, LOW)  // Set OnboardSPI cs low
+#define CS_HIGH() WRITE(ONBOARD_SD_CS_PIN, HIGH) // Set OnboardSPI cs high
 
 #define FCLK_FAST() ONBOARD_SD_SPI.setClockDivider(SPI_CLOCK_MAX)
 #define FCLK_SLOW() ONBOARD_SD_SPI.setClockDivider(SPI_BAUD_PCLK_DIV_256)
@@ -163,7 +158,7 @@ static void sd_power_on() {
   ONBOARD_SD_SPI.begin();
   ONBOARD_SD_SPI.setBitOrder(MSBFIRST);
   ONBOARD_SD_SPI.setDataMode(SPI_MODE0);
-  CS_HIGH();
+  OUT_WRITE(ONBOARD_SD_CS_PIN, HIGH); // Set CS# high
 }
 
 // Disable SPI function
@@ -283,7 +278,7 @@ DSTATUS disk_initialize (
   if (drv) return STA_NOINIT;                                         // Supports only drive 0
   sd_power_on();                                                      // Initialize SPI
 
-  if (Stat & STA_NODISK) return Stat;                                 // Is a card existing in the socket?
+  if (Stat & STA_NODISK) return Stat;                                 // Is a card existing in the soket?
 
   FCLK_SLOW();
   for (n = 10; n; n--) xchg_spi(0xFF);                                // Send 80 dummy clocks

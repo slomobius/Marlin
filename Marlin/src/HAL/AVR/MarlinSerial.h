@@ -34,7 +34,6 @@
 #include <WString.h>
 
 #include "../../inc/MarlinConfigPre.h"
-#include "../../core/types.h"
 #include "../../core/serial_hook.h"
 
 #ifndef SERIAL_PORT
@@ -139,6 +138,10 @@
 
   #define BYTE 0
 
+  // Templated type selector
+  template<bool b, typename T, typename F> struct TypeSelector { typedef T type;} ;
+  template<typename T, typename F> struct TypeSelector<false, T, F> { typedef F type; };
+
   template<typename Cfg>
   class MarlinSerial {
   protected:
@@ -161,7 +164,7 @@
     static constexpr B_U2Xx<Cfg::PORT>   B_U2X   = 0;
 
     // Base size of type on buffer size
-    typedef uvalue_t(Cfg::RX_SIZE - 1) ring_buffer_pos_t;
+    typedef typename TypeSelector<(Cfg::RX_SIZE>256), uint16_t, uint8_t>::type ring_buffer_pos_t;
 
     struct ring_buffer_r {
       volatile ring_buffer_pos_t head, tail;
@@ -188,13 +191,13 @@
                    rx_framing_errors;
     static ring_buffer_pos_t rx_max_enqueued;
 
-    FORCE_INLINE static ring_buffer_pos_t atomic_read_rx_head();
+    static FORCE_INLINE ring_buffer_pos_t atomic_read_rx_head();
 
     static volatile bool rx_tail_value_not_stable;
     static volatile uint16_t rx_tail_value_backup;
 
-    FORCE_INLINE static void atomic_set_rx_tail(ring_buffer_pos_t value);
-    FORCE_INLINE static ring_buffer_pos_t atomic_read_rx_tail();
+    static FORCE_INLINE void atomic_set_rx_tail(ring_buffer_pos_t value);
+    static FORCE_INLINE ring_buffer_pos_t atomic_read_rx_tail();
 
   public:
     FORCE_INLINE static void store_rxd_char();
@@ -214,7 +217,7 @@
     #endif
 
     enum { HasEmergencyParser = Cfg::EMERGENCYPARSER };
-    static bool emergency_parser_enabled() { return Cfg::EMERGENCYPARSER; }
+    static inline bool emergency_parser_enabled() { return Cfg::EMERGENCYPARSER; }
 
     FORCE_INLINE static uint8_t dropped() { return Cfg::DROPPED_RX ? rx_dropped_bytes : 0; }
     FORCE_INLINE static uint8_t buffer_overruns() { return Cfg::RX_OVERRUNS ? rx_buffer_overruns : 0; }

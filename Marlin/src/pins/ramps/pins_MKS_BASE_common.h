@@ -23,7 +23,6 @@
 
 /**
  * MKS BASE – Arduino Mega2560 with RAMPS pin assignments
- * ATmega2560
  */
 
 #ifndef BOARD_INFO_NAME

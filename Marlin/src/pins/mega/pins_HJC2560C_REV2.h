@@ -23,7 +23,6 @@
 
 /**
  * Geeetech HJC2560-C Rev 2.x board pin assignments
- * ATmega2560
  */
 
 #include "env_validate.h"
@@ -113,9 +112,9 @@
 //
 // M3/M4/M5 - Spindle/Laser Control
 //
-#if HAS_CUTTER
+#if ENABLED(SPINDLE_LASER_ENABLE)
   #define SPINDLE_DIR_PIN                     16
-  #define SPINDLE_LASER_ENA_PIN               17  // Pin should have a pullup!
+  #define SPINDLE_LASER_ENABLE_PIN            17  // Pin should have a pullup!
   #define SPINDLE_LASER_PWM_PIN                9  // Hardware PWM
 #endif
 
@@ -135,7 +134,7 @@
     #if ENABLED(HJC_LCD_SMART_CONTROLLER)
       #define LCD_BACKLIGHT_PIN                5  // LCD_Backlight
       //#ifndef LCD_CONTRAST_PIN
-      //  #define LCD_CONTRAST_PIN             5  // LCD_Contrast
+      //  #define LCD_CONTRAST_PIN  5   // LCD_Contrast
       //#endif
       #ifndef FIL_RUNOUT_PIN
         #define FIL_RUNOUT_PIN                24  // Filament runout

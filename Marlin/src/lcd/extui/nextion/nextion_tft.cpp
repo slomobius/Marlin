@@ -33,7 +33,6 @@
 
 #include "../../../MarlinCore.h"
 #include "../../../feature/pause.h"
-#include "../../../module/stepper.h"
 #include "../../../gcode/queue.h"
 #include "../../../libs/numtostr.h"
 #include "../../../sd/cardreader.h"
@@ -73,7 +72,7 @@ void NextionTFT::Startup() {
   SEND_VALasTXT("tmppage.bedy", Y_BED_SIZE);
   SEND_VALasTXT("tmppage.bedz", Z_MAX_POS);
 
-  DEBUG_ECHOLNPGM("Nextion Debug Level ", NEXDEBUGLEVEL);
+  DEBUG_ECHOLNPAIR("Nextion Debug Level ", NEXDEBUGLEVEL);
 }
 
 void NextionTFT::IdleLoop() {
@@ -84,12 +83,12 @@ void NextionTFT::IdleLoop() {
   UpdateOnChange();
 }
 
-void NextionTFT::PrinterKilled(FSTR_P const error, FSTR_P const component) {
+void NextionTFT::PrinterKilled(PGM_P error, PGM_P component) {
   SEND_TXT_END("page error");
-  SEND_TXT_F("t3", F("Error"));
-  SEND_TXT_F("t4", component);
-  SEND_TXT_F("t5", error);
-  SEND_TXT_F("t6", F("Need reset"));
+  SEND_TXT("t3", "Error");
+  SEND_TXT_P("t4", component);
+  SEND_TXT_P("t5", error);
+  SEND_TXT("t6", "Need reset");
 }
 
 void NextionTFT::PrintFinished() {
@@ -99,23 +98,23 @@ void NextionTFT::PrintFinished() {
 void NextionTFT::ConfirmationRequest(const char * const msg) {
   SEND_VALasTXT("tmppage.M117", msg);
   #if NEXDEBUG(N_MARLIN)
-    DEBUG_ECHOLNPGM("ConfirmationRequest() ", msg, " printer_state:", printer_state);
+    DEBUG_ECHOLNPAIR("ConfirmationRequest() ", msg, " printer_state:", printer_state);
   #endif
 }
 
 void NextionTFT::StatusChange(const char * const msg) {
   #if NEXDEBUG(N_MARLIN)
-    DEBUG_ECHOLNPGM("StatusChange() ", msg, "\nprinter_state:", printer_state);
+    DEBUG_ECHOLNPAIR("StatusChange() ", msg, "\nprinter_state:", printer_state);
   #endif
   SEND_VALasTXT("tmppage.M117", msg);
 }
 
-void NextionTFT::SendtoTFT(FSTR_P const fstr/*=nullptr*/) { // A helper to print PROGMEM string to the panel
+void NextionTFT::SendtoTFT(PGM_P str) { // A helper to print PROGMEM string to the panel
   #if NEXDEBUG(N_SOME)
-    DEBUG_ECHOF(fstr);
+    DEBUG_ECHOPGM_P(str);
   #endif
-  PGM_P str = FTOP(fstr);
-  while (const char c = pgm_read_byte(str++)) LCD_SERIAL.write(c);
+  while (const char c = pgm_read_byte(str++))
+    LCD_SERIAL.write(c);
 }
 
 bool NextionTFT::ReadTFTCommand() {
@@ -134,12 +133,12 @@ bool NextionTFT::ReadTFTCommand() {
     if (nextion_command[0] == 'G' || nextion_command[0] == 'M' || nextion_command[0] == 'T')
       injectCommands(nextion_command);
     #if NEXDEBUG(N_ALL)
-      DEBUG_ECHOLNPGM("< ", nextion_command);
+      DEBUG_ECHOLNPAIR("< ", nextion_command);
     #endif
     #if NEXDEBUG(N_SOME)
       uint8_t req = atoi(&nextion_command[1]);
       if (req > 7 && req != 20)
-        DEBUG_ECHOLNPGM(  "> ", AS_CHAR(nextion_command[0]),
+        DEBUG_ECHOLNPAIR(  "> ", AS_CHAR(nextion_command[0]),
                          "\n> ", AS_CHAR(nextion_command[1]),
                          "\n> ", AS_CHAR(nextion_command[2]),
                          "\n> ", AS_CHAR(nextion_command[3]),
@@ -152,7 +151,7 @@ bool NextionTFT::ReadTFTCommand() {
 void NextionTFT::SendFileList(int8_t startindex) {
   // respond to panel request for 7 files starting at index
   #if NEXDEBUG(N_INFO)
-    DEBUG_ECHOLNPGM("## SendFileList ## ", startindex);
+    DEBUG_ECHOLNPAIR("## SendFileList ## ", startindex);
   #endif
   filenavigator.getFiles(startindex);
 }
@@ -335,7 +334,7 @@ void NextionTFT::PanelInfo(uint8_t req) {
     break;
 
   case 29: // Preheat
-    #if HAS_PREHEAT
+    #if PREHEAT_COUNT
       if (!isPrinting()) {
         // Preheat PLA
         if (nextion_command[4] == 'P') {
@@ -430,24 +429,25 @@ void NextionTFT::PanelInfo(uint8_t req) {
     break;
 
   case 36: // Endstop Info
-    #if X_HOME_TO_MIN
+    #if HAS_X_MIN
       SEND_VALasTXT("x1", READ(X_MIN_PIN) != X_MIN_ENDSTOP_INVERTING ? "triggered" : "open");
-    #elif X_HOME_TO_MAX
+    #endif
+    #if HAS_X_MAX
       SEND_VALasTXT("x2", READ(X_MAX_PIN) != X_MAX_ENDSTOP_INVERTING ? "triggered" : "open");
     #endif
-    #if Y_HOME_TO_MIN
+    #if HAS_Y_MIN
       SEND_VALasTXT("y1", READ(Y_MIN_PIN) != Y_MIN_ENDSTOP_INVERTING ? "triggered" : "open");
-    #elif Y_HOME_TO_MAX
-      SEND_VALasTXT("y2", READ(X_MAX_PIN) != Y_MAX_ENDSTOP_INVERTING ? "triggered" : "open");
     #endif
-    #if Z_HOME_TO_MIN
+    #if HAS_Z_MIN
       SEND_VALasTXT("z1", READ(Z_MIN_PIN) != Z_MIN_ENDSTOP_INVERTING ? "triggered" : "open");
-    #elif Z_HOME_TO_MAX
+    #endif
+    #if HAS_Z_MAX
       SEND_VALasTXT("z2", READ(Z_MAX_PIN) != Z_MAX_ENDSTOP_INVERTING ? "triggered" : "open");
     #endif
     #if HAS_Z2_MIN
       SEND_VALasTXT("z2", READ(Z2_MIN_PIN) != Z2_MIN_ENDSTOP_INVERTING ? "triggered" : "open");
-    #elif HAS_Z2_MAX
+    #endif
+    #if HAS_Z2_MAX
       SEND_VALasTXT("z2", READ(Z2_MAX_PIN) != Z2_MAX_ENDSTOP_INVERTING ? "triggered" : "open");
     #endif
     #if HAS_BED_PROBE
@@ -459,17 +459,17 @@ void NextionTFT::PanelInfo(uint8_t req) {
 
   case 37: // PID
     #if ENABLED(PIDTEMP)
-      #define SEND_PID_INFO_0(A, B) SEND_VALasTXT(A, getPID_K##B(E0))
+      #define SEND_PID_INFO_0(A, B) SEND_VALasTXT(A, getPIDValues_K##B(E0))
     #else
       #define SEND_PID_INFO_0(A, B) SEND_NA(A)
     #endif
     #if BOTH(PIDTEMP, HAS_MULTI_EXTRUDER)
-      #define SEND_PID_INFO_1(A, B) SEND_VALasTXT(A, getPID_K##B(E1))
+      #define SEND_PID_INFO_1(A, B) SEND_VALasTXT(A, getPIDValues_K##B(E1))
     #else
       #define SEND_PID_INFO_1(A, B) SEND_NA(A)
     #endif
     #if ENABLED(PIDTEMPBED)
-      #define SEND_PID_INFO_BED(A, B) SEND_VALasTXT(A, getBedPID_K##B())
+      #define SEND_PID_INFO_BED(A, B) SEND_VALasTXT(A, getBedPIDValues_K##B())
     #else
       #define SEND_PID_INFO_BED(A, B) SEND_NA(A)
     #endif
@@ -521,7 +521,7 @@ void NextionTFT::PanelAction(uint8_t req) {
 
     case 66: // Refresh SD
       if (!isPrinting()) {
-        injectCommands(F("M21"));
+        injectCommands_P(PSTR("M21"));
         filenavigator.reset();
       }
       break;
@@ -536,7 +536,7 @@ void NextionTFT::PanelAction(uint8_t req) {
 
     case 57: // Disable Motors
       if (!isPrinting()) {
-        stepper.disable_all_steppers();
+        disable_all_steppers(); // from marlincore.h
         SEND_TXT("tmppage.M117", "Motors disabled");
       }
       break;
@@ -545,8 +545,8 @@ void NextionTFT::PanelAction(uint8_t req) {
       #if ENABLED(FILAMENT_LOAD_UNLOAD_GCODES)
         if (canMove(getActiveTool())) {
           switch (nextion_command[4]) {
-            case 'L': injectCommands(F("M701")); break;
-            case 'U': injectCommands(F("M702")); break;
+            case 'L': injectCommands_P(PSTR("M701")); break;
+            case 'U': injectCommands_P(PSTR("M702")); break;
           }
         }
         else {
@@ -559,7 +559,7 @@ void NextionTFT::PanelAction(uint8_t req) {
       break;
 
     case 63: // Preheat // Temps defined in configuration.h
-      #if HAS_PREHEAT
+      #if PREHEAT_COUNT
         if (!isPrinting()) switch (nextion_command[4]) {
           // Preheat PLA
           case 'P':

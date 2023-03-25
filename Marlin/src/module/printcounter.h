@@ -37,9 +37,7 @@ struct printStatistics {    // 16 bytes
   uint16_t finishedPrints;  // Number of complete prints
   uint32_t printTime;       // Accumulated printing time
   uint32_t longestPrint;    // Longest successful print job
-  #if HAS_EXTRUDERS
-    float  filamentUsed;    // Accumulated filament consumed in mm
-  #endif
+  float    filamentUsed;    // Accumulated filament consumed in mm
   #if SERVICE_INTERVAL_1 > 0
     uint32_t nextService1;  // Service intervals (or placeholders)
   #endif
@@ -54,7 +52,12 @@ struct printStatistics {    // 16 bytes
 class PrintCounter: public Stopwatch {
   private:
     typedef Stopwatch super;
-    typedef IF<EITHER(USE_WIRED_EEPROM, CPU_32_BIT), uint32_t, uint16_t>::type eeprom_address_t;
+
+    #if EITHER(USE_WIRED_EEPROM, CPU_32_BIT)
+      typedef uint32_t eeprom_address_t;
+    #else
+      typedef uint16_t eeprom_address_t;
+    #endif
 
     static printStatistics data;
 
@@ -109,7 +112,7 @@ class PrintCounter: public Stopwatch {
     /**
      * @brief Initialize the print counter
      */
-    static void init() {
+    static inline void init() {
       super::init();
       loadStats();
     }
@@ -121,15 +124,13 @@ class PrintCounter: public Stopwatch {
      */
     FORCE_INLINE static bool isLoaded() { return loaded; }
 
-    #if HAS_EXTRUDERS
-      /**
-       * @brief Increment the total filament used
-       * @details The total filament used counter will be incremented by "amount".
-       *
-       * @param amount The amount of filament used in mm
-       */
-      static void incFilamentUsed(float const &amount);
-    #endif
+    /**
+     * @brief Increment the total filament used
+     * @details The total filament used counter will be incremented by "amount".
+     *
+     * @param amount The amount of filament used in mm
+     */
+    static void incFilamentUsed(float const &amount);
 
     /**
      * @brief Reset the Print Statistics
@@ -175,8 +176,8 @@ class PrintCounter: public Stopwatch {
      */
     static bool start();
     static bool _stop(const bool completed);
-    static bool stop()  { return _stop(true);  }
-    static bool abort() { return _stop(false); }
+    static inline bool stop()  { return _stop(true);  }
+    static inline bool abort() { return _stop(false); }
 
     static void reset();
 
