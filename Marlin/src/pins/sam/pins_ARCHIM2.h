@@ -145,19 +145,17 @@
 #endif
 
 //
-// Software SPI pins for TMC2130 stepper drivers.
+// SPI pins for TMC2130 stepper drivers.
 // Required for the Archim2 board.
 //
-#if ENABLED(TMC_USE_SW_SPI)
-  #ifndef TMC_SW_MOSI
-    #define TMC_SW_MOSI                       28  // PD3
-  #endif
-  #ifndef TMC_SW_MISO
-    #define TMC_SW_MISO                       26  // PD1
-  #endif
-  #ifndef TMC_SW_SCK
-    #define TMC_SW_SCK                        27  // PD2
-  #endif
+#ifndef TMC_SPI_MOSI
+  #define TMC_SPI_MOSI                        28  // PD3
+#endif
+#ifndef TMC_SPI_MISO
+  #define TMC_SPI_MISO                        26  // PD1
+#endif
+#ifndef TMC_SPI_SCK
+  #define TMC_SPI_SCK                         27  // PD2
 #endif
 
 //
@@ -245,8 +243,6 @@
   #define LCD_PINS_D5                         54  // D54 PA16_SCK1
   #define LCD_PINS_D6                         68  // D68 PA1_CANRX0
   #define LCD_PINS_D7                         34  // D34 PC2_PWML0
-
-  #define SD_DETECT_PIN                        2  // D2  PB25_TIOA0
 #endif
 
 #if ANY(IS_ULTIPANEL, TOUCH_UI_ULTIPANEL, TOUCH_UI_FTDI_EVE)
@@ -254,4 +250,11 @@
   #define BTN_EN1                             60  // D60 PA3_TIOB1
   #define BTN_EN2                             13  // D13 PB27_TIOB0
   #define BTN_ENC                             16  // D16 PA13_TXD1 // the click
+#endif
+
+#if ANY(HAS_WIRED_LCD, TOUCH_UI_ULTIPANEL, TOUCH_UI_FTDI_EVE, USB_FLASH_DRIVE_SUPPORT)
+  #define SD_DETECT_PIN                        2  // D2  PB25_TIOA0
+  #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+    #define DISABLE_DUE_SD_MMC
+  #endif
 #endif
