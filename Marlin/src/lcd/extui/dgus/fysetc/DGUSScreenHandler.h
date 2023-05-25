@@ -21,26 +21,6 @@
  */
 #pragma once
 
-<<<<<<<< HEAD:Marlin/src/lcd/extui/mks_ui/mks_hardware.h
-#include "../../../inc/MarlinConfigPre.h"
-
-#include <lvgl.h>
-
-// Functions for MKS_TEST
-#if BOTH(MKS_TEST, SDSUPPORT)
-  void mks_hardware_test();
-  void mks_test_get();
-  void mks_gpio_test();
-  extern uint8_t mks_test_flag;
-#else
-  #define mks_test_flag 0
-#endif
-
-// String display and assets
-void disp_string(uint16_t x, uint16_t y, const char * string, uint16_t charColor, uint16_t bkColor);
-void disp_assets_update();
-void disp_assets_update_progress(const char *msg);
-========
 #include "../DGUSScreenHandlerBase.h"
 
 typedef DGUSScreenHandler DGUSScreenHandlerClass;
@@ -49,4 +29,3 @@ typedef DGUSScreenHandler DGUSScreenHandlerClass;
   #define PLR_SCREEN_RECOVER DGUSLCD_SCREEN_SDPRINTMANIPULATION
   #define PLR_SCREEN_CANCEL DGUSLCD_SCREEN_STATUS
 #endif
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/extui/dgus/fysetc/DGUSScreenHandler.h

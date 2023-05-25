@@ -21,41 +21,16 @@
  */
 #include "../../../inc/MarlinConfigPre.h"
 
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/dwin_lcd.cpp
-/********************************************************************************
- * @file     lcd/e3v2/creality/dwin_lcd.cpp
- * @author   LEO / Creality3D
- * @date     2019/07/18
- * @version  2.0.1
- * @brief    DWIN screen control functions
- ********************************************************************************/
-
-#include "../../../inc/MarlinConfigPre.h"
-========
 #if HAS_DWIN_E3V2 || IS_DWIN_MARLINUI
 
 #include "dwin_api.h"
 #include "dwin_set.h"
 #include "dwin_font.h"
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/dwin_api.cpp
 
 #include "../../../inc/MarlinConfig.h"
 
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/dwin_lcd.cpp
-#include "../../../inc/MarlinConfig.h"
-
-#include "dwin_lcd.h"
 #include <string.h> // for memset
 
-//#define DEBUG_OUT 1
-#include "../../../core/debug_out.h"
-
-// Make sure DWIN_SendBuf is large enough to hold the largest string plus draw command and tail.
-// Assume the narrowest (6 pixel) font and 2-byte gb2312-encoded characters.
-========
-#include <string.h> // for memset
-
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/dwin_api.cpp
 uint8_t DWIN_SendBuf[11 + DWIN_WIDTH / 6 * 2] = { 0xAA };
 uint8_t DWIN_BufTail[4] = { 0xCC, 0x33, 0xC3, 0x3C };
 uint8_t databuf[26] = { 0 };
@@ -104,26 +79,6 @@ bool DWIN_Handshake() {
         && databuf[3] == 'K' );
 }
 
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/dwin_lcd.cpp
-void DWIN_Startup(void) {
-  DEBUG_ECHOPGM("\r\nDWIN handshake ");
-  delay(750);   // Delay here or init later in the boot process
-  if (DWIN_Handshake()) DEBUG_ECHOLNPGM("ok."); else DEBUG_ECHOLNPGM("error.");
-  DWIN_Frame_SetDir(1);
-  #if DISABLED(SHOW_BOOTSCREEN)
-    DWIN_Frame_Clear(Color_Bg_Black); // MarlinUI handles the bootscreen so just clear here
-  #endif
-  DWIN_UpdateLCD();
-}
-
-// Set the backlight luminance
-//  luminance: (0x00-0xFF)
-void DWIN_Backlight_SetLuminance(const uint8_t luminance) {
-  size_t i = 0;
-  DWIN_Byte(i, 0x30);
-  DWIN_Byte(i, _MAX(luminance, 0x1F));
-  DWIN_Send(i);
-========
 #if HAS_LCD_BRIGHTNESS
   // Set LCD backlight (from DWIN Enhanced)
   //  brightness: 0x00-0xFF
@@ -167,7 +122,6 @@ uint8_t fontHeight(uint8_t cfont) {
     case font32x64: return 64;
     default: return 0;
   }
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/dwin_api.cpp
 }
 
 // Set screen display direction
@@ -278,17 +232,12 @@ void DWIN_Frame_AreaMove(uint8_t mode, uint8_t dir, uint16_t dis,
 //  bColor: Background color
 //  x/y: Upper-left coordinate of the string
 //  *string: The string
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/dwin_lcd.cpp
-void DWIN_Draw_String(bool bShow, uint8_t size, uint16_t color, uint16_t bColor, uint16_t x, uint16_t y, char *string) {
-  uint8_t widthAdjust = 0;
-========
 //  rlimit: To limit the drawn string length
 void DWIN_Draw_String(bool bShow, uint8_t size, uint16_t color, uint16_t bColor, uint16_t x, uint16_t y, const char * const string, uint16_t rlimit/*=0xFFFF*/) {
   #if NONE(DWIN_LCD_PROUI, DWIN_CREALITY_LCD_JYERSUI, IS_DWIN_MARLINUI)
     DWIN_Draw_Rectangle(1, bColor, x, y, x + (fontWidth(size) * strlen_P(string)), y + fontHeight(size));
   #endif
   constexpr uint8_t widthAdjust = 0;
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/dwin_api.cpp
   size_t i = 0;
   DWIN_Byte(i, 0x11);
   // Bit 7: widthAdjust
@@ -421,12 +370,7 @@ void DWIN_ICON_Show(bool IBD, bool BIR, bool BFI, uint8_t libID, uint8_t picID, 
   DWIN_Byte(i, 0x23);
   DWIN_Word(i, x);
   DWIN_Word(i, y);
-<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/dwin_lcd.cpp
-  DWIN_Byte(i, 0x80 | libID);
-  //DWIN_Byte(i, libID);
-========
   DWIN_Byte(i, (IBD << 7) | (BIR << 6) | (BFI << 5) | libID);
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/dwin_api.cpp
   DWIN_Byte(i, picID);
   DWIN_Send(i);
 }

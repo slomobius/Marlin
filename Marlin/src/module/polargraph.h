@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2022 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -21,6 +21,7 @@
  */
 #pragma once
 
+<<<<<<<< HEAD:Marlin/src/module/polargraph.h
 /**
  * polargraph.h - Polargraph-specific functions
  */
@@ -33,3 +34,18 @@ extern xy_pos_t draw_area_min, draw_area_max;
 extern float polargraph_max_belt_len;
 
 void inverse_kinematics(const xyz_pos_t &raw);
+========
+#ifdef __cplusplus
+  extern "C" { /* C-declarations for C++ */
+#endif
+
+void lv_draw_z_offset_wizard();
+void refresh_wizard_pos();
+void disp_cur_wizard_pos();
+void disp_move_wizard_dist();
+void lv_clear_z_offset_wizard();
+
+#ifdef __cplusplus
+  } /* C-declarations for C++ */
+#endif
+>>>>>>>> upstream/2.1.x:Marlin/src/lcd/extui/mks_ui/draw_z_offset_wizard.h

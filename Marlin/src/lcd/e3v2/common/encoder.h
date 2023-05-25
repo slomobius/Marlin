@@ -23,6 +23,7 @@
 
 /*****************************************************************************
 <<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.h
+<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.h
   * @file     lcd/e3v2/creality/rotary_encoder.h
   * @author   LEO / Creality3D
   * @date     2019/07/06
@@ -30,6 +31,9 @@
 ========
   * @file     lcd/e3v2/common/encoder.h
 >>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/encoder.h
+========
+  * @file     lcd/e3v2/common/encoder.h
+>>>>>>>> upstream/2.1.x:Marlin/src/lcd/e3v2/common/encoder.h
   * @brief    Rotary encoder functions
   ****************************************************************************/
 

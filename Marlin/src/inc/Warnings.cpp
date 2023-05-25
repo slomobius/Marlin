@@ -792,19 +792,8 @@
 #endif
 
 /**
- * POLAR warnings
- */
-#if BOTH(POLAR, S_CURVE_ACCELERATION)
-  #warning "POLAR kinematics may not work well with S_CURVE_ACCELERATION."
-#endif
-
-/**
  * Input Shaping
  */
 #if HAS_SHAPING && ANY(CORE_IS_XY, MARKFORGED_XY, MARKFORGED_YX)
   #warning "Input Shaping for CORE / MARKFORGED kinematic axes is still experimental."
-#endif
-
-#if MULTISTEPPING_LIMIT_WARNING
-  #warning "MULTISTEPPING_LIMIT has been automatically set to 128. Use a lower value if the machine is slow to respond."
 #endif
