@@ -25,11 +25,7 @@
 #include "DGUSVPVariable.h"
 #include "DGUSDisplayDef.h"
 
-<<<<<<<< HEAD:Marlin/src/lcd/extui/dgus/fysetc/DGUSScreenHandler.h
-#include "../../../../inc/MarlinConfig.h"
-========
 #include "../../../inc/MarlinConfig.h"
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/extui/dgus/DGUSScreenHandlerBase.h
 
 enum DGUSLCD_Screens : uint8_t;
 
@@ -41,9 +37,6 @@ public:
 
   // Send all 4 strings that are displayed on the infoscreen, confirmation screen and kill screen
   // The bools specifying whether the strings are in RAM or FLASH.
-<<<<<<<< HEAD:Marlin/src/lcd/extui/dgus/fysetc/DGUSScreenHandler.h
-  static void sendinfoscreen(const char *line1, const char *line2, const char *line3, const char *line4, bool l1inflash, bool l2inflash, bool l3inflash, bool liinflash);
-========
   static void sendinfoscreen(PGM_P const line1, PGM_P const line2, PGM_P const line3, PGM_P const line4, bool l1inflash, bool l2inflash, bool l3inflash, bool liinflash);
   static void sendinfoscreen(FSTR_P const line1, FSTR_P const line2, PGM_P const line3, PGM_P const line4, bool l1inflash, bool l2inflash, bool l3inflash, bool liinflash) {
     sendinfoscreen(FTOP(line1), FTOP(line2), line3, line4, l1inflash, l2inflash, l3inflash, liinflash);
@@ -51,7 +44,6 @@ public:
   static void sendinfoscreen(FSTR_P const line1, FSTR_P const line2, FSTR_P const line3, FSTR_P const line4, bool l1inflash, bool l2inflash, bool l3inflash, bool liinflash) {
     sendinfoscreen(FTOP(line1), FTOP(line2), FTOP(line3), FTOP(line4), l1inflash, l2inflash, l3inflash, liinflash);
   }
->>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/extui/dgus/DGUSScreenHandlerBase.h
 
   static void HandleUserConfirmationPopUp(uint16_t ConfirmVP, PGM_P const line1, PGM_P const line2, PGM_P const line3, PGM_P const line4, bool l1inflash, bool l2inflash, bool l3inflash, bool liinflash);
 
@@ -59,7 +51,6 @@ public:
   static void setstatusmessage(const char *msg);
   // The same for messages from Flash
   static void setstatusmessagePGM(PGM_P const msg);
-  static void setstatusmessage(FSTR_P const fmsg) { setstatusmessagePGM(FTOP(fmsg)); }
   // Callback for VP "Display wants to change screen on idle printer"
   static void ScreenChangeHookIfIdle(DGUS_VP_Variable &var, void *val_ptr);
   // Callback for VP "Screen has been changed"
@@ -199,7 +190,7 @@ public:
   // Send a float value to the display.
   // Display will get a 4-byte integer scaled to the number of digits:
   // Tell the display the number of digits and it cheats by displaying a dot between...
-  template<uint16_t decimals>
+  template<unsigned int decimals>
   static void DGUSLCD_SendFloatAsLongValueToDisplay(DGUS_VP_Variable &var) {
     if (var.memadr) {
       float f = *(float *)var.memadr;
@@ -211,7 +202,7 @@ public:
   // Send a float value to the display.
   // Display will get a 2-byte integer scaled to the number of digits:
   // Tell the display the number of digits and it cheats by displaying a dot between...
-  template<uint16_t decimals>
+  template<unsigned int decimals>
   static void DGUSLCD_SendFloatAsIntValueToDisplay(DGUS_VP_Variable &var) {
     if (var.memadr) {
       float f = *(float *)var.memadr;

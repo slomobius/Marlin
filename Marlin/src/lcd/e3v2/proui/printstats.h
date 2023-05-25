@@ -21,6 +21,7 @@
  */
 #pragma once
 
+<<<<<<<< HEAD:Marlin/src/lcd/e3v2/proui/printstats.h
 /**
  * Print Stats page for PRO UI
  * Author: Miguel A. Risco-Castillo (MRISCOC)
@@ -38,3 +39,17 @@ extern PrintStatsClass PrintStats;
 
 void Goto_PrintStats();
 void PrintStatsReset();
+========
+#define ALLOW_STM32DUINO
+#include "env_validate.h"
+
+#if HOTENDS > 2 || E_STEPPERS > 2
+  #error "MKS Eagle supports up to 2 hotends / E steppers."
+#elif HAS_FSMC_TFT
+  #error "MKS Eagle doesn't support FSMC-based TFT displays."
+#endif
+
+#define BOARD_INFO_NAME "MKS Eagle"
+
+#include "pins_MKS_ROBIN_NANO_V3_common.h"
+>>>>>>>> upstream/2.1.x:Marlin/src/pins/stm32f4/pins_MKS_EAGLE.h

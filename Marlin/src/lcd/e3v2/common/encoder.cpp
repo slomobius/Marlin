@@ -22,6 +22,7 @@
 
 /*****************************************************************************
 <<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
+<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
  * @file     lcd/e3v2/creality/rotary_encoder.cpp
  * @author   LEO / Creality3D
  * @date     2019/07/06
@@ -29,6 +30,9 @@
 ========
  * @file     lcd/e3v2/common/encoder.cpp
 >>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
+========
+ * @file     lcd/e3v2/common/encoder.cpp
+>>>>>>>> upstream/2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
  * @brief    Rotary encoder functions
  *****************************************************************************/
 
@@ -125,12 +129,17 @@ EncoderState Encoder_ReceiveAnalyze() {
 
   if (ABS(temp_diff) >= ENCODER_PULSES_PER_STEP) {
 <<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
+<<<<<<<< HEAD:Marlin/src/lcd/e3v2/creality/rotary_encoder.cpp
     if (temp_diff > 0) temp_diffState = ENCODER_DIFF_CW;
     else temp_diffState = ENCODER_DIFF_CCW;
 ========
     if (temp_diff > 0) temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CCW, ENCODER_DIFF_CW);
     else temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CW, ENCODER_DIFF_CCW);
 >>>>>>>> upstream/bugfix-2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
+========
+    if (temp_diff > 0) temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CCW, ENCODER_DIFF_CW);
+    else temp_diffState = TERN(REVERSE_ENCODER_DIRECTION, ENCODER_DIFF_CW, ENCODER_DIFF_CCW);
+>>>>>>>> upstream/2.1.x:Marlin/src/lcd/e3v2/common/encoder.cpp
 
     #if ENABLED(ENCODER_RATE_MULTIPLIER)
 

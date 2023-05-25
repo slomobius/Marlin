@@ -343,7 +343,7 @@ namespace Language_uk {
   LSTR MSG_MOVE_10MM                        = _UxGT("Рух 10мм");
   LSTR MSG_MOVE_100MM                       = _UxGT("Рух 100mm");
   LSTR MSG_SPEED                            = _UxGT("Швидкість");
-  LSTR MSG_MESH_Z_OFFSET                    = _UxGT("Z Столу");
+  LSTR MSG_BED_Z                            = _UxGT("Z Столу");
   LSTR MSG_NOZZLE                           = _UxGT("Сопло, ") LCD_STR_DEGREE _UxGT("C");
   LSTR MSG_NOZZLE_N                         = _UxGT("Сопло ~");
   LSTR MSG_NOZZLE_PARKED                    = _UxGT("Сопло запарковане");
@@ -387,7 +387,7 @@ namespace Language_uk {
   LSTR MSG_PID_AUTOTUNE                     = _UxGT("Автопідбір PID");
   LSTR MSG_PID_AUTOTUNE_E                   = _UxGT("Автопідбір PID *");
   LSTR MSG_PID_AUTOTUNE_DONE                = _UxGT("Підбір PID виконано");
-  LSTR MSG_PID_BAD_HEATER_ID                = _UxGT("Збій автопідбору! Поганий екструдер.");
+  LSTR MSG_PID_BAD_EXTRUDER_NUM             = _UxGT("Збій автопідбору! Поганий екструдер.");
   LSTR MSG_PID_TEMP_TOO_HIGH                = _UxGT("Збій автопідбору! Температура завищена.");
   LSTR MSG_PID_TIMEOUT                      = _UxGT("Збій автопідбору! Вичерпан час.");
 
@@ -465,7 +465,7 @@ namespace Language_uk {
     LSTR MSG_INIT_EEPROM                    = _UxGT("Ініціаліз. EEPROM");
   #endif
   LSTR MSG_ERR_EEPROM_CRC                   = _UxGT("Збій EEPROM: CRC");
-  LSTR MSG_ERR_EEPROM_INDEX                 = _UxGT("Збій EEPROM: індекс");
+  LSTR MSG_ERR_EEPROM_SIZE                  = _UxGT("Збій EEPROM: розмір");
   LSTR MSG_ERR_EEPROM_VERSION               = _UxGT("Збій EEPROM: версія");
   LSTR MSG_SETTINGS_STORED                  = _UxGT("Параметри збережені");
   LSTR MSG_MEDIA_UPDATE                     = _UxGT("Оновити SD-картку");

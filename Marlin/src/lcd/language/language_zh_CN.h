@@ -232,7 +232,7 @@ namespace Language_zh_CN {
   LSTR MSG_MOVE_10MM                      = _UxGT("移动 10 mm");     // "Move 10mm"
   LSTR MSG_MOVE_100MM                     = _UxGT("移动 100 mm");     // "Move 100mm"
   LSTR MSG_SPEED                          = _UxGT("速率");     // "Speed"
-  LSTR MSG_MESH_Z_OFFSET                  = _UxGT("热床Z");     // "Bed Z"
+  LSTR MSG_BED_Z                          = _UxGT("热床Z");     // "Bed Z"
   LSTR MSG_NOZZLE                         = _UxGT("喷嘴");     // "Nozzle" 噴嘴
   LSTR MSG_NOZZLE_N                       = _UxGT("喷嘴 ~");     // "Nozzle" 噴嘴
   LSTR MSG_NOZZLE_PARKED                  = _UxGT("喷嘴已停靠");
@@ -261,7 +261,7 @@ namespace Language_zh_CN {
   LSTR MSG_PID_AUTOTUNE                   = _UxGT("自动PID");
   LSTR MSG_PID_AUTOTUNE_E                 = _UxGT("自动PID *");
   LSTR MSG_PID_AUTOTUNE_DONE              = _UxGT("PID调整完成");
-  LSTR MSG_PID_BAD_HEATER_ID              = _UxGT("自动调失败! 坏的挤出机");
+  LSTR MSG_PID_BAD_EXTRUDER_NUM           = _UxGT("自动调失败! 坏的挤出机");
   LSTR MSG_PID_TEMP_TOO_HIGH              = _UxGT("自动调失败! 温度太高");
   LSTR MSG_PID_TIMEOUT                    = _UxGT("自动调失败! 超时");
   LSTR MSG_SELECT_E                       = _UxGT("选择 *");
@@ -317,9 +317,9 @@ namespace Language_zh_CN {
   LSTR MSG_LOAD_EEPROM                    = _UxGT("装载设置");     // "Load memory"
   LSTR MSG_RESTORE_DEFAULTS               = _UxGT("恢复安全值");     // "Restore Defaults"
   LSTR MSG_INIT_EEPROM                    = _UxGT("初始化设置");     // "Initialize EEPROM"
-  LSTR MSG_ERR_EEPROM_CRC                 = _UxGT("EEPROM CRC 错误");
-  LSTR MSG_ERR_EEPROM_INDEX               = _UxGT("EEPROM Index 错误");
-  LSTR MSG_ERR_EEPROM_VERSION             = _UxGT("EEPROM Version 错误");
+  LSTR MSG_ERR_EEPROM_CRC                 = _UxGT("EEPROM 校验和 错误");
+  LSTR MSG_ERR_EEPROM_SIZE                = _UxGT("EEPROM 尺寸 错误");
+  LSTR MSG_ERR_EEPROM_VERSION             = _UxGT("EEPROM 版本 错误");
   LSTR MSG_SETTINGS_STORED                = _UxGT("设置已保存");
   LSTR MSG_MEDIA_UPDATE                   = _UxGT("存储器更新");
   LSTR MSG_RESET_PRINTER                  = _UxGT("复位打印机");

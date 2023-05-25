@@ -28,6 +28,7 @@
 #include "../../module/motion.h"
 #include "../../module/probe.h"
 #include "../../feature/bedlevel/bedlevel.h"
+#include "../../lcd/marlinui.h"
 
 #if HAS_PTC
   #include "../../feature/probe_temp_comp.h"
@@ -35,10 +36,6 @@
 
 #if HAS_MULTI_HOTEND
   #include "../../module/tool_change.h"
-#endif
-
-#if EITHER(DWIN_LCD_PROUI, DWIN_CREALITY_LCD_JYERSUI)
-  #include "../../lcd/marlinui.h"
 #endif
 
 /**
@@ -53,7 +50,10 @@
  */
 void GcodeSuite::G30() {
 
-  probe.use_probing_tool();
+  #if HAS_MULTI_HOTEND
+    const uint8_t old_tool_index = active_extruder;
+    tool_change(0);
+  #endif
 
   // Convert the given logical position to native position
   const xy_pos_t pos = {
@@ -67,9 +67,7 @@ void GcodeSuite::G30() {
 
     remember_feedrate_scaling_off();
 
-    #if EITHER(DWIN_LCD_PROUI, DWIN_CREALITY_LCD_JYERSUI)
-      process_subcommands_now(F("G28O"));
-    #endif
+    TERN_(DWIN_CREALITY_LCD_JYERSUI, process_subcommands_now(F("G28O")));
 
     const ProbePtRaise raise_after = parser.boolval('E', true) ? PROBE_PT_STOW : PROBE_PT_NONE;
 
@@ -97,13 +95,12 @@ void GcodeSuite::G30() {
     report_current_position();
   }
   else {
-    #if ENABLED(DWIN_LCD_PROUI)
-      SERIAL_ECHOLNF(GET_EN_TEXT_F(MSG_ZPROBE_OUT));
-      LCD_MESSAGE(MSG_ZPROBE_OUT);
-    #endif
+    SERIAL_ECHOLNF(GET_EN_TEXT_F(MSG_ZPROBE_OUT));
+    LCD_MESSAGE(MSG_ZPROBE_OUT);
   }
 
-  probe.use_probing_tool(false);
+  // Restore the active tool
+  TERN_(HAS_MULTI_HOTEND, tool_change(old_tool_index));
 }
 
 #endif // HAS_BED_PROBE

@@ -97,10 +97,10 @@
     #define Z_MAX_PIN                         -1
   #endif
   #ifndef I_STOP_PIN
-    #define I_STOP_PIN                        18
+    #define I_STOP_PIN                        18  // Z-
   #endif
   #ifndef J_STOP_PIN
-    #define J_STOP_PIN                        19
+    #define J_STOP_PIN                        19  // Z+
   #endif
 #endif
 
@@ -109,26 +109,26 @@
 //
 #ifndef X_STOP_PIN
   #ifndef X_MIN_PIN
-    #define X_MIN_PIN                          3
+    #define X_MIN_PIN                          3  // X-
   #endif
   #ifndef X_MAX_PIN
-    #define X_MAX_PIN                          2
+    #define X_MAX_PIN                          2  // X+
   #endif
 #endif
 #ifndef Y_STOP_PIN
   #ifndef Y_MIN_PIN
-    #define Y_MIN_PIN                         14
+    #define Y_MIN_PIN                         14  // Y-
   #endif
   #ifndef Y_MAX_PIN
-    #define Y_MAX_PIN                         15
+    #define Y_MAX_PIN                         15  // Y+
   #endif
 #endif
 #ifndef Z_STOP_PIN
   #ifndef Z_MIN_PIN
-    #define Z_MIN_PIN                         18
+    #define Z_MIN_PIN                         18  // Z-
   #endif
   #ifndef Z_MAX_PIN
-    #define Z_MAX_PIN                         19
+    #define Z_MAX_PIN                         19  // Z+
   #endif
 #endif
 
@@ -320,14 +320,16 @@
 //
 // TMC software SPI
 //
-#ifndef TMC_SPI_MOSI
-  #define TMC_SPI_MOSI                        66
-#endif
-#ifndef TMC_SPI_MISO
-  #define TMC_SPI_MISO                        44
-#endif
-#ifndef TMC_SPI_SCK
-  #define TMC_SPI_SCK                         64
+#if ENABLED(TMC_USE_SW_SPI)
+  #ifndef TMC_SW_MOSI
+    #define TMC_SW_MOSI                       66
+  #endif
+  #ifndef TMC_SW_MISO
+    #define TMC_SW_MISO                       44
+  #endif
+  #ifndef TMC_SW_SCK
+    #define TMC_SW_SCK                        64
+  #endif
 #endif
 
 #if HAS_TMC_UART
@@ -687,8 +689,6 @@
 
     #if IS_RRD_SC
 
-      #define BEEPER_PIN             EXP1_01_PIN
-
       #if ENABLED(CR10_STOCKDISPLAY)
         #define BTN_EN1              EXP1_03_PIN
         #define BTN_EN2              EXP1_05_PIN
@@ -743,7 +743,9 @@
       #define DOGLCD_A0              AUX2_07_PIN
       #define LCD_SCREEN_ROTATE              180  // 0, 90, 180, 270
 
-      #define BEEPER_PIN             EXP2_05_PIN
+      #ifndef BEEPER_PIN
+        #define BEEPER_PIN           EXP2_05_PIN
+      #endif
       #define STAT_LED_RED_PIN       AUX4_03_PIN
       #define STAT_LED_BLUE_PIN      EXP1_02_PIN
 
@@ -761,7 +763,9 @@
       #define DOGLCD_CS              EXP1_08_PIN
       #define DOGLCD_A0              EXP1_07_PIN
 
-      #define BEEPER_PIN             EXP1_05_PIN
+      #ifndef BEEPER_PIN
+        #define BEEPER_PIN           EXP1_05_PIN
+      #endif
       #define LCD_BACKLIGHT_PIN      EXP2_05_PIN
 
       #define BTN_EN1                EXP1_02_PIN
@@ -776,7 +780,6 @@
 
     #elif EITHER(MKS_MINI_12864, FYSETC_MINI_12864)
 
-      #define BEEPER_PIN             EXP1_01_PIN
       #define BTN_ENC                EXP1_02_PIN
       #ifndef SD_DETECT_PIN
         #define SD_DETECT_PIN        EXP2_07_PIN
@@ -830,7 +833,9 @@
 
     #elif ENABLED(MINIPANEL)
 
-      #define BEEPER_PIN             AUX2_08_PIN
+      #ifndef BEEPER_PIN
+        #define BEEPER_PIN           AUX2_08_PIN
+      #endif
       #define LCD_BACKLIGHT_PIN      AUX2_10_PIN
 
       #define DOGLCD_A0              AUX2_07_PIN
@@ -855,8 +860,6 @@
 
     #elif ENABLED(G3D_PANEL)
 
-      #define BEEPER_PIN             EXP1_01_PIN
-
       #ifndef SD_DETECT_PIN
         #define SD_DETECT_PIN        EXP2_07_PIN
       #endif
@@ -874,9 +877,11 @@
 
     #else
 
-      #define BEEPER_PIN             EXP2_05_PIN
+      #ifndef BEEPER_PIN
+        #define BEEPER_PIN           EXP2_05_PIN
+      #endif
 
-      #if ENABLED(PANEL_ONE)                      // Buttons connect directly to AUX-2
+      #if ENABLED(PANEL_ONE)                       // Buttons connect directly to AUX-2
         #define BTN_EN1              AUX2_03_PIN
         #define BTN_EN2              AUX2_04_PIN
         #define BTN_ENC              AUX3_02_PIN
@@ -888,6 +893,10 @@
 
     #endif
   #endif // IS_NEWPANEL
+
+  #ifndef BEEPER_PIN
+    #define BEEPER_PIN               EXP1_01_PIN  // Most common mapping
+  #endif
 
 #endif // HAS_WIRED_LCD && !LCD_PINS_DEFINED
 
