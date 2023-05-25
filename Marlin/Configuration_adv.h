@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#define CONFIG_EXAMPLES_DIR "Creality/Ender-3 Pro/BigTreeTech SKR Mini E3 1.2"
+#define CONFIG_EXAMPLES_DIR "config/examples/Creality/Ender-3 Pro/BigTreeTech SKR Mini E3 1.2" 
 
 /**
  * Configuration_adv.h
@@ -305,12 +305,9 @@
   #define THERMAL_PROTECTION_PERIOD 40        // Seconds
   #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
 
-  //#define ADAPTIVE_FAN_SLOWING              // Slow down the part-cooling fan if the temperature drops
-  #if ENABLED(ADAPTIVE_FAN_SLOWING)
-    //#define REPORT_ADAPTIVE_FAN_SLOWING     // Report fan slowing activity to the console
-    #if EITHER(MPCTEMP, PIDTEMP)
-      //#define TEMP_TUNING_MAINTAIN_FAN      // Don't slow down the fan speed during M303 or M306 T
-    #endif
+  //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
+  #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
+    //#define NO_FAN_SLOWING_IN_PID_TUNING    // Don't slow fan speed during M303
   #endif
 
   /**
@@ -325,7 +322,7 @@
    * and/or decrease WATCH_TEMP_INCREASE. WATCH_TEMP_INCREASE should not be set
    * below 2.
    */
-  #define WATCH_TEMP_PERIOD  20               // Seconds
+  #define WATCH_TEMP_PERIOD  40               // Seconds
   #define WATCH_TEMP_INCREASE 2               // Degrees Celsius
 #endif
 
@@ -380,7 +377,7 @@
 #endif
 
 #if ENABLED(PIDTEMP)
-  // Add an additional term to the heater power, proportional to the extrusion speed.
+  // Add an experimental additional term to the heater power, proportional to the extrusion speed.
   // A well-chosen Kc value should add just enough power to melt the increased material volume.
   //#define PID_EXTRUSION_SCALING
   #if ENABLED(PID_EXTRUSION_SCALING)
@@ -389,7 +386,7 @@
   #endif
 
   /**
-   * Add an additional term to the heater power, proportional to the fan speed.
+   * Add an experimental additional term to the heater power, proportional to the fan speed.
    * A well-chosen Kf value should add just enough power to compensate for power-loss from the cooling fan.
    * You can either just add a constant compensation with the DEFAULT_Kf value
    * or follow the instruction below to get speed-dependent compensation.
@@ -1035,7 +1032,7 @@
 #define ASSISTED_TRAMMING
 #if ENABLED(ASSISTED_TRAMMING)
 
-  // Define from 3 to 9 points to probe.
+  // Define positions for probe points.
   #define TRAMMING_POINT_XY { {  20, 20 }, { 180,  20 }, { 180, 180 }, { 20, 180 } }
 
   // Define position names for probe points.
@@ -1119,7 +1116,7 @@
 
 /**
  * Idle Stepper Shutdown
- * Enable DISABLE_INACTIVE_* to shut down axis steppers after an idle period.
+ * Set DISABLE_INACTIVE_? 'true' to shut down axis steppers after an idle period.
  * The Deactive Time can be overridden with M18 and M84. Set to 0 for No Timeout.
  */
 #define DEFAULT_STEPPER_DEACTIVE_TIME 120
@@ -1135,12 +1132,8 @@
 #define DISABLE_INACTIVE_E true
 
 // Default Minimum Feedrates for printing and travel moves
-#define DEFAULT_MINIMUMFEEDRATE             0.0     // (mm/s) Minimum feedrate. Set with M205 S.
-#define DEFAULT_MINTRAVELFEEDRATE           0.0     // (mm/s) Minimum travel feedrate. Set with M205 T.
-#if HAS_ROTATIONAL_AXES
-  #define DEFAULT_ANGULAR_MINIMUMFEEDRATE   0.0     // (°/s) Minimum feedrate for rotational-only moves. Set with M205 P.
-  #define DEFAULT_ANGULAR_MINTRAVELFEEDRATE 0.0     // (°/s) Minimum travel feedrate for rotational-only moves. Set with M205 Q.
-#endif
+#define DEFAULT_MINIMUMFEEDRATE       0.0     // (mm/s. °/s for rotational-only moves) Minimum feedrate. Set with M205 S.
+#define DEFAULT_MINTRAVELFEEDRATE     0.0     // (mm/s. °/s for rotational-only moves) Minimum travel feedrate. Set with M205 T.
 
 // Minimum time that a segment needs to take as the buffer gets emptied
 #define DEFAULT_MINSEGMENTTIME        20000   // (µs) Set with M205 B.
@@ -1149,7 +1142,7 @@
 // Increase the slowdown divisor for larger buffer sizes.
 #define SLOWDOWN
 #if ENABLED(SLOWDOWN)
-  #define SLOWDOWN_DIVISOR 8
+  #define SLOWDOWN_DIVISOR 2
 #endif
 
 /**
@@ -1272,12 +1265,6 @@
     #define CALIBRATION_PIN_PULLUP
   #endif
 #endif
-
-/**
- * Multi-stepping sends steps in bursts to reduce MCU usage for high step-rates.
- * This allows higher feedrates than the MCU could otherwise support.
- */
-#define MULTISTEPPING_LIMIT   16  //: [1, 2, 4, 8, 16, 32, 64, 128]
 
 /**
  * Adaptive Step Smoothing increases the resolution of multi-axis moves, particularly at step frequencies
@@ -1429,9 +1416,6 @@
     //#define LCD_PRINTER_INFO_IS_BOOTSCREEN // Show bootscreen(s) instead of Printer Info pages
   #endif
 
-  // Add 50/100mm moves to MarlinUI even with a smaller bed
-  //#define LARGE_MOVE_ITEMS
-
   // BACK menu items keep the highlight at the top
   //#define TURBO_BACK_MENU_ITEM
 
@@ -1499,8 +1483,8 @@
 // Add 'M73' to set print job progress, overrides Marlin's built-in estimate
 #define SET_PROGRESS_MANUALLY
 #if ENABLED(SET_PROGRESS_MANUALLY)
-  #define SET_PROGRESS_PERCENT            // Add 'P' parameter to set percentage done
-  #define SET_REMAINING_TIME            // Add 'R' parameter to set remaining time
+  #define SET_PROGRESS_PERCENT            // Add 'P' parameter to set percentage done, otherwise use Marlin's estimate
+  #define SET_REMAINING_TIME            // Add 'R' parameter to set remaining time, otherwise use Marlin's estimate
   //#define SET_INTERACTION_TIME          // Add 'C' parameter to set time until next filament change or other user interaction
   //#define M73_REPORT                    // Report M73 values to host
   #if BOTH(M73_REPORT, SDSUPPORT)
@@ -1519,7 +1503,7 @@
   #define PRINT_PROGRESS_SHOW_DECIMALS  // Show/report progress with decimal digits, not all UIs support this
 
   #if EITHER(HAS_MARLINUI_HD44780, IS_TFTGLCD_PANEL)
-    //#define LCD_PROGRESS_BAR            // Show a progress bar on HD44780 LCDs for SD printing
+    #define LCD_PROGRESS_BAR            // Show a progress bar on HD44780 LCDs for SD printing
     #if ENABLED(LCD_PROGRESS_BAR)
       #define PROGRESS_BAR_BAR_TIME 2000  // (ms) Amount of time to show the bar
       #define PROGRESS_BAR_MSG_TIME 3000  // (ms) Amount of time to show the status message
@@ -1779,15 +1763,6 @@
 //#define NO_SD_HOST_DRIVE   // Disable SD Card access over USB (for security).
 
 /**
- * By default the framework is responsible for the shared media I/O.
- * Enable this if you need Marlin to take care of the shared media I/O.
- * Useful if shared media isn't working properly on some boards.
- */
-#if ENABLED(SDSUPPORT) && DISABLED(NO_SD_HOST_DRIVE)
-  //#define DISKIO_HOST_DRIVE
-#endif
-
-/**
  * Additional options for Graphical Displays
  *
  * Use the optimizations here to improve printing performance,
@@ -1866,7 +1841,6 @@
   #define STATUS_HEAT_PERCENT       // Show heating in a progress bar
   #define BOOT_MARLIN_LOGO_ANIMATED // Animated Marlin logo. Costs ~3260 (or ~940) bytes of flash.
 
- 
   // Frivolous Game Options
   #define MARLIN_BRICKOUT
   #define MARLIN_INVADERS
@@ -1892,11 +1866,11 @@
 
   #define DGUS_UPDATE_INTERVAL_MS  500    // (ms) Interval between automatic screen updates
 
-  #if DGUS_UI_IS(FYSETC, MKS, HIPRECY)
+  #if ANY(DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_MKS, DGUS_LCD_UI_HIPRECY)
     #define DGUS_PRINT_FILENAME           // Display the filename during printing
     #define DGUS_PREHEAT_UI               // Display a preheat screen during heatup
 
-    #if DGUS_UI_IS(FYSETC, MKS)
+    #if EITHER(DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_MKS)
       //#define DGUS_UI_MOVE_DIS_OPTION   // Disabled by default for FYSETC and MKS
     #else
       #define DGUS_UI_MOVE_DIS_OPTION     // Enabled by default for UI_HIPRECY
@@ -1944,7 +1918,7 @@
 //
 // Specify additional languages for the UI. Default specified by LCD_LANGUAGE.
 //
-#if ANY(DOGLCD, TFT_COLOR_UI, TOUCH_UI_FTDI_EVE, IS_DWIN_MARLINUI, ANYCUBIC_LCD_VYPER)
+#if ANY(DOGLCD, TFT_COLOR_UI, TOUCH_UI_FTDI_EVE, IS_DWIN_MARLINUI)
   //#define LCD_LANGUAGE_2 fr
   //#define LCD_LANGUAGE_3 de
   //#define LCD_LANGUAGE_4 es
@@ -2094,7 +2068,7 @@
   //#define BABYSTEP_XY                     // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false           // Change if Z babysteps should go the other way
   //#define BABYSTEP_MILLIMETER_UNITS       // Specify BABYSTEP_MULTIPLICATOR_(XY|Z) in mm instead of micro-steps
-  #define BABYSTEP_MULTIPLICATOR_Z  4       // (steps or mm) Steps or millimeter distance for each Z babystep
+  #define BABYSTEP_MULTIPLICATOR_Z  1       // (steps or mm) Steps or millimeter distance for each Z babystep
   #define BABYSTEP_MULTIPLICATOR_XY 1       // (steps or mm) Steps or millimeter distance for each XY babystep
 
   #define DOUBLECLICK_FOR_Z_BABYSTEPPING    // Double-click on the Status Screen for Z Babystepping.
@@ -2110,13 +2084,9 @@
   //#define BABYSTEP_DISPLAY_TOTAL          // Display total babysteps since last G28
 
   #define BABYSTEP_ZPROBE_OFFSET          // Combine M851 Z and Babystepping
-  //#define BABYSTEP_GLOBAL_Z               // Combine M424 Z and Babystepping
-
-  #if EITHER(BABYSTEP_ZPROBE_OFFSET, BABYSTEP_GLOBAL_Z)
-    #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
-      //#define BABYSTEP_HOTEND_Z_OFFSET    // For multiple hotends, babystep relative Z offsets
-    #endif
-    #define BABYSTEP_GFX_OVERLAY          // Enable graphical overlay on Z-offset editor
+  #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
+    //#define BABYSTEP_HOTEND_Z_OFFSET      // For multiple hotends, babystep relative Z offsets
+    //#define BABYSTEP_ZPROBE_GFX_OVERLAY   // Enable graphical overlay on Z-offset editor
   #endif
 #endif
 
@@ -2137,16 +2107,16 @@
  *
  * See https://marlinfw.org/docs/features/lin_advance.html for full instructions.
  */
-//#define LIN_ADVANCE
+#define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
   #if ENABLED(DISTINCT_E_FACTORS)
-    #define ADVANCE_K { 0.2 }     // (mm) Compression length per 1mm/s extruder speed, per extruder
+    #define ADVANCE_K { 0.0 }     // (mm) Compression length per 1mm/s extruder speed, per extruder
   #else
     #define ADVANCE_K 0.0         // (mm) Compression length applying to all extruders
   #endif
   //#define ADVANCE_K_EXTRA       // Add a second linear advance constant, configurable with M900 L.
   //#define LA_DEBUG              // Print debug information to serial during operation. Disable for production use.
-  //#define EXPERIMENTAL_SCURVE   // Allow S-Curve Acceleration to be used with LA.
+  #define EXPERIMENTAL_SCURVE     // Allow S-Curve Acceleration to be used with LA.
   //#define ALLOW_LOW_EJERK       // Allow a DEFAULT_EJERK value of <10. Recommended for direct drive hotends.
   //#define EXPERIMENTAL_I2S_LA   // Allow I2S_STEPPER_STREAM to be used with LA. Performance degrades as the LA step rate reaches ~20kHz.
 #endif
@@ -2172,10 +2142,13 @@
  * Points to probe for all 3-point Leveling procedures.
  * Override if the automatically selected points are inadequate.
  */
-#if NEEDS_THREE_PROBE_POINTS
-  //#define PROBE_PT_1 {  15, 180 }   // (mm) { x, y }
-  //#define PROBE_PT_2 {  15,  20 }
-  //#define PROBE_PT_3 { 170,  20 }
+#if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
+  //#define PROBE_PT_1_X 15
+  //#define PROBE_PT_1_Y 180
+  //#define PROBE_PT_2_X 15
+  //#define PROBE_PT_2_Y 20
+  //#define PROBE_PT_3_X 170
+  //#define PROBE_PT_3_Y 20
 #endif
 
 /**
@@ -3172,7 +3145,7 @@
    *
    * It is recommended to set HOMING_BUMP_MM to { 0, 0, 0 }.
    *
-   * SPI_ENDSTOPS  *** TMC2130/TMC5160 Only ***
+   * SPI_ENDSTOPS  *** Beta feature! *** TMC2130/TMC5160 Only ***
    * Poll the driver through SPI to determine load when homing.
    * Removes the need for a wire from DIAG1 to an endstop pin.
    *
@@ -3219,9 +3192,10 @@
    //#define TMC_HOME_PHASE { 896, 896, 896 }
 
   /**
-   * Step on both rising and falling edge signals (as with a square wave).
+   * Beta feature!
+   * Create a 50/50 square wave step pulse optimal for stepper drivers.
    */
-  #define EDGE_STEPPING
+  #define SQUARE_WAVE_STEPPING
 
   /**
    * Enable M122 debugging command for TMC stepper drivers.
@@ -3614,14 +3588,6 @@
  */
 //#define CNC_COORDINATE_SYSTEMS
 
-/**
- * CNC Drilling Cycle - UNDER DEVELOPMENT
- *
- * Enables G81 to perform a drilling cycle.
- * Currently only supports a single cycle, no G-code chaining.
- */
-//#define CNC_DRILLING_CYCLE
-
 // @section reporting
 
 /**
@@ -3741,7 +3707,6 @@
 #ifdef G0_FEEDRATE
   //#define VARIABLE_G0_FEEDRATE // The G0 feedrate is set by F in G0 motion mode
 #endif
-//#define G0_ANGULAR_FEEDRATE 2700 // (°/min)
 
 // @section gcode
 
@@ -4155,29 +4120,30 @@
 
   // Add an LCD menu for MMU2
   //#define MMU2_MENUS
+  #if EITHER(MMU2_MENUS, HAS_PRUSA_MMU2S)
+    // Settings for filament load / unload from the LCD menu.
+    // This is for Průša MK3-style extruders. Customize for your hardware.
+    #define MMU2_FILAMENTCHANGE_EJECT_FEED 80.0
+    #define MMU2_LOAD_TO_NOZZLE_SEQUENCE \
+      {  7.2, 1145 }, \
+      { 14.4,  871 }, \
+      { 36.0, 1393 }, \
+      { 14.4,  871 }, \
+      { 50.0,  198 }
 
-  // Settings for filament load / unload from the LCD menu.
-  // This is for Průša MK3-style extruders. Customize for your hardware.
-  #define MMU2_FILAMENTCHANGE_EJECT_FEED 80.0
-  #define MMU2_LOAD_TO_NOZZLE_SEQUENCE \
-    {  7.2, 1145 }, \
-    { 14.4,  871 }, \
-    { 36.0, 1393 }, \
-    { 14.4,  871 }, \
-    { 50.0,  198 }
-
-  #define MMU2_RAMMING_SEQUENCE \
-    {   1.0, 1000 }, \
-    {   1.0, 1500 }, \
-    {   2.0, 2000 }, \
-    {   1.5, 3000 }, \
-    {   2.5, 4000 }, \
-    { -15.0, 5000 }, \
-    { -14.0, 1200 }, \
-    {  -6.0,  600 }, \
-    {  10.0,  700 }, \
-    { -10.0,  400 }, \
-    { -50.0, 2000 }
+    #define MMU2_RAMMING_SEQUENCE \
+      {   1.0, 1000 }, \
+      {   1.0, 1500 }, \
+      {   2.0, 2000 }, \
+      {   1.5, 3000 }, \
+      {   2.5, 4000 }, \
+      { -15.0, 5000 }, \
+      { -14.0, 1200 }, \
+      {  -6.0,  600 }, \
+      {  10.0,  700 }, \
+      { -10.0,  400 }, \
+      { -50.0, 2000 }
+  #endif
 
   /**
    * Using a sensor like the MMU2S
@@ -4200,8 +4166,6 @@
     #define MMU2_CAN_LOAD_INCREMENT_SEQUENCE \
       { -MMU2_CAN_LOAD_INCREMENT, MMU2_CAN_LOAD_FEEDRATE }
 
-    // Continue unloading if sensor detects filament after the initial unload move
-    //#define MMU_IR_UNLOAD_MOVE
   #else
 
     /**

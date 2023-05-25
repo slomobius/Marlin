@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#define CONFIG_EXAMPLES_DIR "Creality/Ender-3 Pro/BigTreeTech SKR Mini E3 1.2"
+#define CONFIG_EXAMPLES_DIR "config/examples/Creality/Ender-3 Pro/BigTreeTech SKR Mini E3 1.2" 
 
 /**
  * Configuration.h
@@ -254,13 +254,7 @@
   #endif
 #endif
 
-// Switch extruders by bumping the toolhead. Requires EVENT_GCODE_TOOLCHANGE_#.
-//#define MECHANICAL_SWITCHING_EXTRUDER
-
-/**
- * A dual-nozzle that uses a servomotor to raise/lower one (or both) of the nozzles.
- * Can be combined with SWITCHING_EXTRUDER.
- */
+// A dual-nozzle that uses a servomotor to raise/lower one (or both) of the nozzles
 //#define SWITCHING_NOZZLE
 #if ENABLED(SWITCHING_NOZZLE)
   #define SWITCHING_NOZZLE_SERVO_NR 0
@@ -268,9 +262,6 @@
   #define SWITCHING_NOZZLE_SERVO_ANGLES { 0, 90 }   // Angles for E0, E1 (single servo) or lowered/raised (dual servo)
   #define SWITCHING_NOZZLE_SERVO_DWELL 2500         // Dwell time to wait for servo to make physical move
 #endif
-
-// Switch nozzles by bumping the toolhead. Requires EVENT_GCODE_TOOLCHANGE_#.
-//#define MECHANICAL_SWITCHING_NOZZLE
 
 /**
  * Two separate X-carriages with extruders that connect to a moving part
@@ -1186,7 +1177,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 150, 150, 20, 120 }
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 20, 120 }
 
 #define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1199,7 +1190,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 5000 } 
+#define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 5000 }
 
 #define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1213,16 +1204,10 @@
  *   M204 P    Acceleration
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
- *   M204 I    Angular Acceleration
- *   M204 J    Angular Travel Acceleration
  */
-#define DEFAULT_ACCELERATION                   500  // X, Y, Z ... and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION           500  // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION            500  // X, Y, Z ... acceleration for travel (non printing) moves
-#if ENABLED(AXIS4_ROTATES)
-  #define DEFAULT_ANGULAR_ACCELERATION        3000  // I, J, K acceleration for rotational-only printing moves
-  #define DEFAULT_ANGULAR_TRAVEL_ACCELERATION 3000  // I, J, K acceleration for rotational-only travel (non printing) moves
-#endif
+#define DEFAULT_ACCELERATION           500    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION   500    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION    500    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk limits (mm/s)
@@ -1299,17 +1284,19 @@
 /**
  * Z_MIN_PROBE_PIN
  *
- * Override this pin only if the probe cannot be connected to
- * the default Z_MIN_PROBE_PIN for the selected MOTHERBOARD.
+ * Define this pin if the probe is not connected to Z_MIN_PIN.
+ * If not defined the default pin for the selected MOTHERBOARD
+ * will be used. Most of the time the default is what you want.
  *
  *  - The simplest option is to use a free endstop connector.
  *  - Use 5V for powered (usually inductive) sensors.
  *
- *  - For simple switches...
- *    - Normally-closed (NC) also connect to GND.
- *    - Normally-open (NO) also connect to 5V.
+ *  - RAMPS 1.3/1.4 boards may use the 5V, GND, and Aux4->D32 pin:
+ *    - For simple switches connect...
+ *      - normally-closed switches to GND and D32.
+ *      - normally-open switches to 5V and D32.
  */
-//#define Z_MIN_PROBE_PIN -1
+//#define Z_MIN_PROBE_PIN 32 // Pin 32 is the RAMPS default
 
 /**
  * Probe Type
@@ -1340,13 +1327,8 @@
 /**
  * Z Servo Probe, such as an endstop switch on a rotating arm.
  */
-//#define Z_PROBE_SERVO_NR 0
-#ifdef Z_PROBE_SERVO_NR
-  //#define Z_SERVO_ANGLES { 70, 0 }      // Z Servo Deploy and Stow angles
-  //#define Z_SERVO_MEASURE_ANGLE 45      // Use if the servo must move to a "free" position for measuring after deploy
-  //#define Z_SERVO_INTERMEDIATE_STOW     // Stow the probe between points
-  //#define Z_SERVO_DEACTIVATE_AFTER_STOW // Deactivate the servo when probe is stowed
-#endif
+//#define Z_PROBE_SERVO_NR 0       // Defaults to SERVO 0 connector.
+//#define Z_SERVO_ANGLES { 70, 0 } // Z Servo Deploy and Stow angles
 
 /**
  * The BLTouch probe uses a Hall effect sensor and emulates a servo.
@@ -1505,18 +1487,12 @@
  */
 #define NOZZLE_TO_PROBE_OFFSET { -45, -12, -2.66 }
 
-// Enable and set to use a specific tool for probing. Disable to allow any tool.
-#define PROBING_TOOL 0
-#ifdef PROBING_TOOL
-  //#define PROBE_TOOLCHANGE_NO_MOVE  // Suppress motion on probe tool-change
-#endif
-
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
 #define PROBING_MARGIN 15
 
 // X and Y axis travel speed (mm/min) between probes
-#define XY_PROBE_FEEDRATE (100*60)
+#define XY_PROBE_FEEDRATE (133*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
 #define Z_PROBE_FEEDRATE_FAST (4*60)
@@ -1660,7 +1636,7 @@
 
 // @section extruder
 
-#define DISABLE_E                 // Disable the extruder when not stepping
+#define DISABLE_E false             // Disable the extruder when not stepping
 //#define DISABLE_INACTIVE_EXTRUDER // Keep only the active extruder enabled
 
 // @section motion
@@ -1856,47 +1832,6 @@
     // as the filament moves. (Be sure to set FILAMENT_RUNOUT_DISTANCE_MM
     // large enough to avoid false positives.)
     //#define FILAMENT_MOTION_SENSOR
-
-    #if ENABLED(FILAMENT_MOTION_SENSOR)
-      //#define FILAMENT_SWITCH_AND_MOTION
-      #if ENABLED(FILAMENT_SWITCH_AND_MOTION)
-        #define NUM_MOTION_SENSORS   1          // Number of sensors, up to one per extruder. Define a FIL_MOTION#_PIN for each.
-        //#define FIL_MOTION1_PIN    -1
-
-        // Override individually if the motion sensors vary
-        //#define FIL_MOTION1_STATE LOW
-        //#define FIL_MOTION1_PULLUP
-        //#define FIL_MOTION1_PULLDOWN
-
-        //#define FIL_MOTION2_STATE LOW
-        //#define FIL_MOTION2_PULLUP
-        //#define FIL_MOTION2_PULLDOWN
-
-        //#define FIL_MOTION3_STATE LOW
-        //#define FIL_MOTION3_PULLUP
-        //#define FIL_MOTION3_PULLDOWN
-
-        //#define FIL_MOTION4_STATE LOW
-        //#define FIL_MOTION4_PULLUP
-        //#define FIL_MOTION4_PULLDOWN
-
-        //#define FIL_MOTION5_STATE LOW
-        //#define FIL_MOTION5_PULLUP
-        //#define FIL_MOTION5_PULLDOWN
-
-        //#define FIL_MOTION6_STATE LOW
-        //#define FIL_MOTION6_PULLUP
-        //#define FIL_MOTION6_PULLDOWN
-
-        //#define FIL_MOTION7_STATE LOW
-        //#define FIL_MOTION7_PULLUP
-        //#define FIL_MOTION7_PULLDOWN
-
-        //#define FIL_MOTION8_STATE LOW
-        //#define FIL_MOTION8_PULLUP
-        //#define FIL_MOTION8_PULLDOWN
-      #endif
-    #endif
   #endif
 #endif
 
@@ -1994,12 +1929,6 @@
   #endif
 
   /**
-   * Add Z offset (M424 Z) that applies to all moves at the planner level.
-   * This Z offset will be automatically set to the middle value with G29.
-   */
-  //#define GLOBAL_MESH_Z_OFFSET
-
-  /**
    * For Cartesian machines, instead of dividing moves on mesh boundaries,
    * split up moves into short segments like a Delta. This follows the
    * contours of the bed more closely than edge-to-edge straight moves.
@@ -2039,7 +1968,7 @@
     #define EXTRAPOLATE_BEYOND_GRID
 
     //
-    // Subdivision of the grid by Catmull-Rom method.
+    // Experimental Subdivision of the grid by Catmull-Rom method.
     // Synthesizes intermediate points to produce a more detailed mesh.
     //
     #define ABL_BILINEAR_SUBDIVISION
@@ -2064,9 +1993,6 @@
 
   //#define UBL_HILBERT_CURVE       // Use Hilbert distribution for less travel when probing multiple points
 
-  //#define UBL_TILT_ON_MESH_POINTS         // Use nearest mesh points with G29 J for better Z reference
-  //#define UBL_TILT_ON_MESH_POINTS_3POINT  // Use nearest mesh points with G29 J0 (3-point)
-
   #define UBL_MESH_EDIT_MOVES_Z     // Sophisticated users prefer no movement of nozzle
   #define UBL_SAVE_ACTIVE_ON_M500   // Save the currently active mesh in the current slot on M500
 
@@ -2074,25 +2000,6 @@
                                           // as the Z-Height correction value.
 
   //#define UBL_MESH_WIZARD         // Run several commands in a row to get a complete mesh
-
-  /**
-   * Probing not allowed within the position of an obstacle.
-   */
-  //#define AVOID_OBSTACLES
-  #if ENABLED(AVOID_OBSTACLES)
-    #define CLIP_W  23  // Bed clip width, should be padded a few mm over its physical size
-    #define CLIP_H  14  // Bed clip height, should be padded a few mm over its physical size
-
-    // Obstacle Rectangles defined as { X1, Y1, X2, Y2 }
-    #define OBSTACLE1 { (X_BED_SIZE) / 4     - (CLIP_W) / 2,                       0, (X_BED_SIZE) / 4     + (CLIP_W) / 2, CLIP_H }
-    #define OBSTACLE2 { (X_BED_SIZE) * 3 / 4 - (CLIP_W) / 2,                       0, (X_BED_SIZE) * 3 / 4 + (CLIP_W) / 2, CLIP_H }
-    #define OBSTACLE3 { (X_BED_SIZE) / 4     - (CLIP_W) / 2, (Y_BED_SIZE) - (CLIP_H), (X_BED_SIZE) / 4     + (CLIP_W) / 2, Y_BED_SIZE }
-    #define OBSTACLE4 { (X_BED_SIZE) * 3 / 4 - (CLIP_W) / 2, (Y_BED_SIZE) - (CLIP_H), (X_BED_SIZE) * 3 / 4 + (CLIP_W) / 2, Y_BED_SIZE }
-
-    // The probed grid must be inset for G29 J. This is okay, since it is
-    // only used to compute a linear transformation for the mesh itself.
-    #define G29J_MESH_TILT_MARGIN ((CLIP_H) + 1)
-  #endif
 
 #elif ENABLED(MESH_BED_LEVELING)
 
@@ -2121,7 +2028,7 @@
 #endif
 
 // Add a menu item to move between bed corners for manual bed adjustment
-#define LEVEL_BED_CORNERS
+#define LCD_BED_TRAMMING
 
 #if ENABLED(LCD_BED_TRAMMING)
   #define BED_TRAMMING_INSET_LFRB { 30, 30, 30, 30 } // (mm) Left, Front, Right, Back insets
@@ -2190,7 +2097,6 @@
 #if ENABLED(Z_SAFE_HOMING)
   #define Z_SAFE_HOMING_X_POINT X_CENTER  // X point for Z homing
   #define Z_SAFE_HOMING_Y_POINT Y_CENTER  // Y point for Z homing
-  //#define Z_SAFE_HOMING_POINT_ABSOLUTE  // Ignore home offsets (M206) for Z homing position
 #endif
 
 // Homing speeds (linear=mm/min, rotational=°/min)
@@ -2347,7 +2253,7 @@
 #endif
 
 /**
- * Clean Nozzle Feature
+ * Clean Nozzle Feature -- EXPERIMENTAL
  *
  * Adds the G12 command to perform a nozzle cleaning process.
  *
@@ -2381,6 +2287,7 @@
  *       Before starting, the nozzle moves to NOZZLE_CLEAN_START_POINT.
  *
  *   Caveats: The ending Z should be the same as starting Z.
+ * Attention: EXPERIMENTAL. G-code arguments may change.
  */
 //#define NOZZLE_CLEAN_FEATURE
 
@@ -3071,9 +2978,6 @@
 //#define DGUS_LCD_UI_RELOADED
 #if ENABLED(DGUS_LCD_UI_MKS)
   #define USE_MKS_GREEN_UI
-#elif DGUS_UI_IS(IA_CREALITY)
-  //#define LCD_SCREEN_ROTATE 90          // Portrait Mode or 800x480 displays
-  //#define IA_CREALITY_BOOT_DELAY 1500   // (ms)
 #endif
 
 //
@@ -3088,33 +2992,19 @@
 //#define TOUCH_UI_FTDI_EVE
 
 //
-// Touch-screen LCD for Anycubic Chiron
-//
-//#define ANYCUBIC_LCD_CHIRON
-
-//
-// Touch-screen LCD for Anycubic i3 Mega
+// Touch-screen LCD for Anycubic printers
 //
 //#define ANYCUBIC_LCD_I3MEGA
-#if ENABLED(ANYCUBIC_LCD_I3MEGA)
+//#define ANYCUBIC_LCD_CHIRON
+#if EITHER(ANYCUBIC_LCD_I3MEGA, ANYCUBIC_LCD_CHIRON)
+  //#define ANYCUBIC_LCD_DEBUG
   //#define ANYCUBIC_LCD_GCODE_EXT  // Add ".gcode" to menu entries for DGUS clone compatibility
 #endif
-
-//
-// Touch-screen LCD for Anycubic Vyper
-//
-//#define ANYCUBIC_LCD_VYPER
 
 //
 // 320x240 Nextion 2.8" serial TFT Resistive Touch Screen NX3224T028
 //
 //#define NEXTION_TFT
-
-//
-// PanelDue touch controller by Escher3D
-// http://escher3d.com/pages/order/products/product2.php
-//
-//#define PANELDUE
 
 //
 // Third-party or vendor-customized controller interfaces.
@@ -3396,6 +3286,10 @@
   //#define RGB_LED_G_PIN 43
   //#define RGB_LED_B_PIN 35
   //#define RGB_LED_W_PIN -1
+  //#define RGB_STARTUP_TEST              // For PWM pins, fade between all colors
+  #if ENABLED(RGB_STARTUP_TEST)
+    #define RGB_STARTUP_TEST_INNER_MS 10  // (ms) Reduce or increase fading speed
+  #endif
 #endif
 
 // Support for Adafruit NeoPixel LED driver
