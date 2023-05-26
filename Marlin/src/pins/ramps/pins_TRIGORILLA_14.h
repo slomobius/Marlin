@@ -46,7 +46,7 @@
 //
 // Heaters / Fans
 //
-#define FAN0_PIN                               9  // FAN0
+#define FAN_PIN                                9  // FAN0
 #define FAN1_PIN                               7  // FAN1
 #define FAN2_PIN                              44  // FAN2
 #ifndef E0_AUTO_FAN_PIN
@@ -69,7 +69,6 @@
  *       IIC : 12V GND D21 D20 GND 5V
  *                    (SCL SDA)
  *
- *             TX2 RX2 RX3 TX3
  * END STOPS : D19 D18 D15 D14 D2  D3
  *             GND GND GND GND GND GND
  *             5V  5V  5V  5V  5V  5V
@@ -119,9 +118,7 @@
   // Chiron uses AUX header for Y and Z endstops
   #define Y_STOP_PIN                          42  // AUX (1)
   #define Z_STOP_PIN                          43  // AUX (2)
-  #ifndef Z2_STOP_PIN
-     #define Z2_STOP_PIN                      18  // Z-
-  #endif
+  #define Z2_MIN_PIN                          18  // Z-
 
   #ifndef Z_MIN_PROBE_PIN
     #define Z_MIN_PROBE_PIN                    2  // X+

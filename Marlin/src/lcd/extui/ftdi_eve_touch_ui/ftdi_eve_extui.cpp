@@ -45,14 +45,14 @@ namespace ExtUI {
   }
 
   void onMediaInserted() {
-    #if HAS_MEDIA
+    #if ENABLED(SDSUPPORT)
       sound.play(media_inserted, PLAY_ASYNCHRONOUS);
       StatusScreen::onMediaInserted();
     #endif
   }
 
   void onMediaRemoved() {
-    #if HAS_MEDIA
+    #if ENABLED(SDSUPPORT)
       if (isPrintingFromMedia()) {
         stopPrint();
         InterfaceSoundsScreen::playEventSound(InterfaceSoundsScreen::PRINTING_FAILED);

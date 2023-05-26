@@ -257,15 +257,15 @@
   #endif
 #endif
 
-#ifndef FAN0_PIN
+#ifndef FAN_PIN
   #if EITHER(FET_ORDER_EFB, FET_ORDER_EFF)        // Hotend, Fan, Bed or Hotend, Fan, Fan
-    #define FAN0_PIN                MOSFET_B_PIN
+    #define FAN_PIN                 MOSFET_B_PIN
   #elif EITHER(FET_ORDER_EEF, FET_ORDER_SF)       // Hotend, Hotend, Fan or Spindle, Fan
-    #define FAN0_PIN                MOSFET_C_PIN
+    #define FAN_PIN                 MOSFET_C_PIN
   #elif FET_ORDER_EEB                             // Hotend, Hotend, Bed
-    #define FAN0_PIN                           4  // IO pin. Buffer needed
+    #define FAN_PIN                            4  // IO pin. Buffer needed
   #else                                           // Non-specific are "EFB" (i.e., "EFBF" or "EFBE")
-    #define FAN0_PIN                MOSFET_B_PIN
+    #define FAN_PIN                 MOSFET_B_PIN
   #endif
 #endif
 
@@ -309,8 +309,8 @@
     #endif
     #define SPINDLE_DIR_PIN                    5
   #elif HAS_FREE_AUX2_PINS
-    #define SPINDLE_LASER_PWM_PIN             44  // Hardware PWM
     #define SPINDLE_LASER_ENA_PIN             40  // Pullup or pulldown!
+    #define SPINDLE_LASER_PWM_PIN             44  // Hardware PWM
     #define SPINDLE_DIR_PIN                   65
   #else
     #error "No auto-assignable Spindle/Laser pins available."
@@ -339,9 +339,8 @@
    * Hardware serial communication ports.
    * If undefined software serial is used according to the pins below
    *
-   * Serial1 -- TX1 = D18   RX1 = D19 (Z-MIN and Z-MAX on RAMPS)
-   * Serial2 -- TX2 = D16   RX2 = D17 (AUX4-18 and AUX4-17)
-   * Serial3 -- TX3 = D14   RX3 = D15 (Available on some RAMPS-like boards)
+   * Serial2 -- AUX-4 Pin 18 (D16 TX2) and AUX-4 Pin 17 (D17 RX2)
+   * Serial1 -- Pins D18 and D19 are used for Z-MIN and Z-MAX
    */
   //#define X_HARDWARE_SERIAL Serial1
   //#define X2_HARDWARE_SERIAL Serial1
@@ -597,13 +596,13 @@
   #if ENABLED(REPRAPWORLD_GRAPHICAL_LCD)
 
     #define LCD_PINS_RS              EXP2_07_PIN  // CS chip select /SS chip slave select
-    #define LCD_PINS_EN              EXP2_06_PIN  // SID (MOSI)
+    #define LCD_PINS_ENABLE          EXP2_06_PIN  // SID (MOSI)
     #define LCD_PINS_D4              EXP2_02_PIN  // SCK (CLK) clock
 
   #elif BOTH(IS_NEWPANEL, PANEL_ONE)
 
     #define LCD_PINS_RS              AUX2_06_PIN
-    #define LCD_PINS_EN              AUX2_08_PIN
+    #define LCD_PINS_ENABLE          AUX2_08_PIN
     #define LCD_PINS_D4              AUX2_10_PIN
     #define LCD_PINS_D5              AUX2_09_PIN
     #define LCD_PINS_D6              AUX2_07_PIN
@@ -618,7 +617,7 @@
     #if ENABLED(CR10_STOCKDISPLAY)
 
       #define LCD_PINS_RS            EXP1_07_PIN
-      #define LCD_PINS_EN            EXP1_08_PIN
+      #define LCD_PINS_ENABLE        EXP1_08_PIN
       #define LCD_PINS_D4            EXP1_06_PIN
 
       #if !IS_NEWPANEL
@@ -632,7 +631,7 @@
       #endif
 
       #define LCD_PINS_RS            AUX2_05_PIN
-      #define LCD_PINS_EN            AUX2_07_PIN
+      #define LCD_PINS_ENABLE        AUX2_07_PIN
       #define LCD_PINS_D4            AUX2_04_PIN
       #define LCD_PINS_D5            AUX2_06_PIN
       #define LCD_PINS_D6            AUX2_08_PIN
@@ -654,7 +653,7 @@
         #define DOGLCD_SCK           EXP1_05_PIN
       #else
         #define LCD_PINS_RS          EXP1_04_PIN
-        #define LCD_PINS_EN          EXP1_03_PIN
+        #define LCD_PINS_ENABLE      EXP1_03_PIN
         #define LCD_PINS_D4          EXP1_05_PIN
         #define LCD_PINS_D5          EXP1_06_PIN
         #define LCD_PINS_D6          EXP1_07_PIN

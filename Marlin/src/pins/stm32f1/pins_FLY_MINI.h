@@ -111,8 +111,8 @@
 //
 #define HEATER_0_PIN                        PC6
 #define HEATER_BED_PIN                      PC7
-#ifndef FAN0_PIN
-  #define FAN0_PIN                          PC8
+#ifndef FAN_PIN
+  #define FAN_PIN                           PC8
 #endif
 #define FAN1_PIN                            PC9
 
@@ -154,7 +154,7 @@
 //
 #if HAS_WIRED_LCD
 
-  #define SPI_DEVICE                           2  // Maple
+  #define SPI_DEVICE                           2
   #define SD_SS_PIN                  EXP2_04_PIN
   #define SD_SCK_PIN                 EXP2_02_PIN
   #define SD_MISO_PIN                EXP2_01_PIN
@@ -166,7 +166,7 @@
   #define BEEPER_PIN                 EXP1_01_PIN
 
   #define LCD_PINS_RS                EXP1_04_PIN
-  #define LCD_PINS_EN                EXP1_03_PIN
+  #define LCD_PINS_ENABLE            EXP1_03_PIN
   #define LCD_PINS_D4                EXP1_05_PIN
   #define LCD_PINS_D5                EXP1_06_PIN
   #define LCD_PINS_D6                EXP1_07_PIN

@@ -40,7 +40,7 @@
 #include "../../../feature/bedlevel/bedlevel.h"
 #include "meshviewer.h"
 
-#if ENABLED(USE_UBL_VIEWER)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
   #include "bedlevel_tools.h"
 #endif
 

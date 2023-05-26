@@ -166,8 +166,8 @@
 #define HEATER_5_PIN                        PE3
 #define HEATER_BED_PIN                      PE2
 
-#ifndef FAN0_PIN
-  #define FAN0_PIN                          PF8
+#ifndef FAN_PIN
+  #define FAN_PIN                           PF8
 #endif
 #define FAN1_PIN                            PF9
 #define FAN2_PIN                            PA2
@@ -214,9 +214,9 @@
 
 #if SD_CONNECTION_IS(ONBOARD)
 
-  #define ONBOARD_SDIO                            // Use SDIO for onboard SD
+  #define SDIO_SUPPORT                            // Use SDIO for onboard SD
 
-  #if DISABLED(ONBOARD_SDIO)
+  #if DISABLED(SDIO_SUPPORT)
     #define SOFTWARE_SPI                          // Use soft SPI for onboard SD
     #define SDSS                            PC11
     #define SD_SCK_PIN                      PC12
@@ -288,7 +288,7 @@
 #if IS_RRD_SC
   #define BEEPER_PIN                 EXP1_01_PIN
   #define LCD_PINS_RS                EXP1_04_PIN
-  #define LCD_PINS_EN                EXP1_03_PIN
+  #define LCD_PINS_ENABLE            EXP1_03_PIN
   #define LCD_PINS_D4                EXP1_05_PIN
   #define LCD_PINS_D5                EXP1_06_PIN
   #define LCD_PINS_D6                EXP1_07_PIN

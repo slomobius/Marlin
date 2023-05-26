@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2023 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -21,7 +21,11 @@
  */
 
 /**
- * lcd/extui/anycubic/Tunes.cpp
+ * lcd/extui/anycubic_chiron/Tunes.cpp
+ *
+ * Extensible_UI implementation for Anycubic Chiron
+ * Written By Nick Wells, 2020 [https://github.com/SwiftNick]
+ *  (not affiliated with Anycubic, Ltd.)
  */
 
 /***********************************************************************
@@ -31,23 +35,27 @@
 
 #include "../../../inc/MarlinConfigPre.h"
 
-#if EITHER(ANYCUBIC_LCD_CHIRON, ANYCUBIC_LCD_VYPER)
+// TODO: Use Marlin's built-in tone player instead.
+
+#if ENABLED(ANYCUBIC_LCD_CHIRON)
 
 #include "Tunes.h"
-#include "../../../libs/buzzer.h"
 #include "../ui_api.h"
 
 namespace Anycubic {
 
-  void PlayTune(const uint16_t *tune, const uint8_t speed/*=1*/) {
+  void PlayTune(uint8_t beeperPin, const uint16_t *tune, uint8_t speed=1) {
+    uint8_t pos = 1;
     const uint16_t wholenotelen = tune[0] / speed;
-    for (uint8_t pos = 1; pos < MAX_TUNE_LENGTH; pos += 2) {
-      const uint16_t freq = tune[pos];
-      if (freq == n_END) break;
-      BUZZ(wholenotelen / tune[pos + 1], freq);
-    }
+    do {
+      const uint16_t freq = tune[pos], notelen = wholenotelen / tune[pos + 1];
+      ::tone(beeperPin, freq, notelen);
+      ExtUI::delay_ms(notelen);
+      pos += 2;
+      if (pos >= MAX_TUNE_LENGTH) break;
+    } while (tune[pos] != n_END);
   }
 
 }
 
-#endif // ANYCUBIC_LCD_CHIRON || ANYCUBIC_LCD_VYPER
+#endif // ANYCUBIC_LCD_CHIRON

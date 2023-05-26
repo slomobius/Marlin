@@ -141,16 +141,14 @@
   #define K_SERIAL_RX_PIN        K_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
-  #ifndef TMC_BAUD_RATE
-    #define TMC_BAUD_RATE                  19200
-  #endif
+  #define TMC_BAUD_RATE                    19200
 
-#endif // HAS_TMC_UART
+#endif
 
 //
 // Heaters / Fans
 //
-#define FAN0_PIN                            PE2
+#define FAN_PIN                             PE2
 #define FAN1_PIN                            PE3
 #define FAN2_PIN                            PE4
 #define FAN3_PIN                            PE5

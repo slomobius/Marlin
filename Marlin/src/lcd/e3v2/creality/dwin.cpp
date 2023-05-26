@@ -45,7 +45,7 @@
   #define JUST_BABYSTEP 1
 #endif
 
-#include "../../utf8.h"
+#include "../../fontutils.h"
 #include "../../marlinui.h"
 
 #include "../../../sd/cardreader.h"
@@ -100,6 +100,12 @@
 // Print speed limit
 #define MIN_PRINT_SPEED  10
 #define MAX_PRINT_SPEED 999
+
+// Feedspeed limit (max feedspeed = DEFAULT_MAX_FEEDRATE * 2)
+#define MIN_MAXFEEDSPEED      1
+#define MIN_MAXACCELERATION   1
+#define MIN_MAXJERK           0.1
+#define MIN_STEP              1
 
 #define FEEDRATE_E      (60)
 
@@ -174,6 +180,13 @@ uint8_t index_file     = MROWS,
         index_advset   = MROWS;
 
 bool dwin_abort_flag = false; // Flag to reset feedrate, return to Home
+
+constexpr float default_max_feedrate[]        = DEFAULT_MAX_FEEDRATE;
+constexpr float default_max_acceleration[]    = DEFAULT_MAX_ACCELERATION;
+
+#if HAS_CLASSIC_JERK
+  constexpr float default_max_jerk[]          = { DEFAULT_XJERK, DEFAULT_YJERK, DEFAULT_ZJERK, DEFAULT_EJERK };
+#endif
 
 static uint8_t _card_percent = 0;
 static uint16_t _remain_time = 0;
@@ -398,7 +411,7 @@ void Scroll_Menu(const uint8_t dir) {
 }
 
 inline uint16_t nr_sd_menu_items() {
-  return card.get_num_items() + !card.flag.workDirIsRoot;
+  return card.get_num_Files() + !card.flag.workDirIsRoot;
 }
 
 void Erase_Menu_Text(const uint8_t line) {
@@ -1260,7 +1273,7 @@ void Goto_MainMenu() {
     DWIN_Frame_TitleCopy(2, 2, 26, 13);   // "Home" etc
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title(GET_TEXT_F(MSG_MAIN_MENU));
+      Draw_Title(GET_TEXT_F(MSG_MAIN));
     #else
       DWIN_Frame_TitleCopy(0, 2, 40, 11); // "Home"
     #endif
@@ -1555,7 +1568,8 @@ void HMI_MaxFeedspeedXYZE() {
   }
   // MaxFeedspeed limit
   if (WITHIN(HMI_flag.feedspeed_axis, X_AXIS, LAST_AXIS))
-    LIMIT(HMI_ValueStruct.Max_Feedspeed, min_feedrate_edit_values[HMI_flag.feedspeed_axis], max_feedrate_edit_values[HMI_flag.feedspeed_axis]);
+    NOMORE(HMI_ValueStruct.Max_Feedspeed, default_max_feedrate[HMI_flag.feedspeed_axis] * 2);
+  if (HMI_ValueStruct.Max_Feedspeed < MIN_MAXFEEDSPEED) HMI_ValueStruct.Max_Feedspeed = MIN_MAXFEEDSPEED;
   // MaxFeedspeed value
   Draw_Edit_Integer4(select_speed.now, HMI_ValueStruct.Max_Feedspeed, true);
 }
@@ -1573,7 +1587,8 @@ void HMI_MaxAccelerationXYZE() {
   }
   // MaxAcceleration limit
   if (WITHIN(HMI_flag.acc_axis, X_AXIS, LAST_AXIS))
-    LIMIT(HMI_ValueStruct.Max_Acceleration, min_acceleration_edit_values[HMI_flag.acc_axis], max_acceleration_edit_values[HMI_flag.acc_axis]);
+    NOMORE(HMI_ValueStruct.Max_Acceleration, default_max_acceleration[HMI_flag.acc_axis] * 2);
+  if (HMI_ValueStruct.Max_Acceleration < MIN_MAXACCELERATION) HMI_ValueStruct.Max_Acceleration = MIN_MAXACCELERATION;
   // MaxAcceleration value
   Draw_Edit_Integer4(select_acc.now, HMI_ValueStruct.Max_Acceleration, true);
 }
@@ -1587,13 +1602,14 @@ void HMI_MaxAccelerationXYZE() {
       checkkey = MaxJerk;
       EncoderRate.enabled = false;
       if (WITHIN(HMI_flag.jerk_axis, X_AXIS, LAST_AXIS))
-        planner.set_max_jerk(HMI_flag.jerk_axis, HMI_ValueStruct.Max_Jerk_scaled / MINUNITMULT);
+        planner.set_max_jerk(HMI_flag.jerk_axis, HMI_ValueStruct.Max_Jerk_scaled / 10);
       Draw_Edit_Float3(select_jerk.now, HMI_ValueStruct.Max_Jerk_scaled);
       return;
     }
     // MaxJerk limit
     if (WITHIN(HMI_flag.jerk_axis, X_AXIS, LAST_AXIS))
-      LIMIT(HMI_ValueStruct.Max_Jerk_scaled, min_jerk_edit_values[HMI_flag.jerk_axis] * MINUNITMULT, max_jerk_edit_values[HMI_flag.jerk_axis] * MINUNITMULT);
+      NOMORE(HMI_ValueStruct.Max_Jerk_scaled, default_max_jerk[HMI_flag.jerk_axis] * 2 * MINUNITMULT);
+    NOLESS(HMI_ValueStruct.Max_Jerk_scaled, (MIN_MAXJERK) * MINUNITMULT);
     // MaxJerk value
     Draw_Edit_Float3(select_jerk.now, HMI_ValueStruct.Max_Jerk_scaled, true);
   }
@@ -1607,13 +1623,14 @@ void HMI_StepXYZE() {
     checkkey = Step;
     EncoderRate.enabled = false;
     if (WITHIN(HMI_flag.step_axis, X_AXIS, LAST_AXIS))
-      planner.settings.axis_steps_per_mm[HMI_flag.step_axis] = HMI_ValueStruct.Max_Step_scaled / MINUNITMULT;
+      planner.settings.axis_steps_per_mm[HMI_flag.step_axis] = HMI_ValueStruct.Max_Step_scaled / 10;
     Draw_Edit_Float3(select_step.now, HMI_ValueStruct.Max_Step_scaled);
     return;
   }
   // Step limit
   if (WITHIN(HMI_flag.step_axis, X_AXIS, LAST_AXIS))
-    LIMIT(HMI_ValueStruct.Max_Step_scaled, min_steps_edit_values[HMI_flag.step_axis] * MINUNITMULT, max_steps_edit_values[HMI_flag.step_axis] * MINUNITMULT);
+    NOMORE(HMI_ValueStruct.Max_Step_scaled, 999.9 * MINUNITMULT);
+  NOLESS(HMI_ValueStruct.Max_Step_scaled, MIN_STEP);
   // Step value
   Draw_Edit_Float3(select_step.now, HMI_ValueStruct.Max_Step_scaled, true);
 }
@@ -1813,9 +1830,9 @@ void MarlinUI::refresh() { /* Nothing to see here */ }
   void Init_Shift_Name() {
     const bool is_subdir = !card.flag.workDirIsRoot;
     const int8_t filenum = select_file.now - 1 - is_subdir; // Skip "Back" and ".."
-    const int16_t fileCnt = card.get_num_items();
+    const uint16_t fileCnt = card.get_num_Files();
     if (WITHIN(filenum, 0, fileCnt - 1)) {
-      card.selectFileByIndexSorted(filenum);
+      card.getfilename_sorted(SD_ORDER(filenum, fileCnt));
       char * const name = card.longest_filename();
       make_name_without_ext(shift_name, name, 100);
     }
@@ -1840,7 +1857,7 @@ void Draw_SDItem(const uint16_t item, int16_t row=-1) {
     return;
   }
 
-  card.selectFileByIndexSorted(item - is_subdir);
+  card.getfilename_sorted(SD_ORDER(item - is_subdir, card.get_num_Files()));
   char * const name = card.longest_filename();
 
   #if ENABLED(SCROLL_LONG_FILENAMES)
@@ -2206,7 +2223,7 @@ void HMI_SelectFile() {
     }
     else {
       const uint16_t filenum = select_file.now - 1 - hasUpDir;
-      card.selectFileByIndexSorted(filenum);
+      card.getfilename_sorted(SD_ORDER(filenum, card.get_num_Files()));
 
       // Enter that folder!
       if (card.flag.filenameIsDir) {

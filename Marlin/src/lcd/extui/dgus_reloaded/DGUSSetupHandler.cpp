@@ -31,7 +31,7 @@
 
 #include "../../../gcode/queue.h"
 
-#if HAS_MEDIA
+#if ENABLED(SDSUPPORT)
   bool DGUSSetupHandler::Print() {
     dgus_screen_handler.filelist.refresh();
 

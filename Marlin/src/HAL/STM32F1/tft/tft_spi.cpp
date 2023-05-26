@@ -20,8 +20,6 @@
  *
  */
 
-#ifdef __STM32F1__
-
 #include "../../../inc/MarlinConfig.h"
 
 #if HAS_SPI_TFT
@@ -94,24 +92,25 @@ uint32_t TFT_SPI::GetID() {
 }
 
 uint32_t TFT_SPI::ReadID(uint16_t Reg) {
-  uint32_t data = 0;
-
-  #if PIN_EXISTS(TFT_MISO)
+  #if !PIN_EXISTS(TFT_MISO)
+    return 0;
+  #else
+    uint8_t d = 0;
+    uint32_t data = 0;
     SPIx.setClockDivider(SPI_CLOCK_DIV16);
     DataTransferBegin(DATASIZE_8BIT);
     WriteReg(Reg);
 
     LOOP_L_N(i, 4) {
-      uint8_t d;
-      SPIx.read(&d, 1);
+      SPIx.read((uint8_t*)&d, 1);
       data = (data << 8) | d;
     }
 
     DataTransferEnd();
     SPIx.setClockDivider(SPI_CLOCK_MAX);
-  #endif
 
-  return data >> 7;
+    return data >> 7;
+  #endif
 }
 
 bool TFT_SPI::isBusy() {
@@ -155,7 +154,7 @@ void TFT_SPI::TransmitDMA(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Coun
   DataTransferBegin();
   SPIx.dmaSendAsync(Data, Count, MemoryIncrease == DMA_MINC_ENABLE);
 
-  TERN_(TFT_SHARED_IO, while (isBusy()));
+  TERN_(TFT_SHARED_SPI, while (isBusy()));
 }
 
 void TFT_SPI::Transmit(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count) {
@@ -166,5 +165,3 @@ void TFT_SPI::Transmit(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count) 
 }
 
 #endif // HAS_SPI_TFT
-
-#endif // __STM32F1__

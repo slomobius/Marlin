@@ -118,11 +118,8 @@
   #endif
 
   // Reduce baud rate to improve software serial reliability
-  #ifndef TMC_BAUD_RATE
-    #define TMC_BAUD_RATE                  19200
-  #endif
-
-#endif // HAS_TMC_UART
+  #define TMC_BAUD_RATE                    19200
+#endif
 
 //
 // Stepper current PWM
@@ -137,8 +134,8 @@
 //
 #define HEATER_0_PIN                        PC7
 #define HEATER_BED_PIN                      PC6
-#ifndef FAN0_PIN
-  #define FAN0_PIN                          PC8
+#ifndef FAN_PIN
+  #define FAN_PIN                           PC8
 #endif
 
 //
