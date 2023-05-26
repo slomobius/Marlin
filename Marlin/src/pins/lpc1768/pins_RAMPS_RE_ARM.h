@@ -154,8 +154,11 @@
   #endif
 
   // Reduce baud rate to improve software serial reliability
-  #define TMC_BAUD_RATE                    19200
-#endif
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
+#endif // HAS_TMC_UART
 
 //
 // Temperature Sensors
@@ -206,15 +209,15 @@
   #endif
 #endif
 
-#ifndef FAN_PIN
+#ifndef FAN0_PIN
   #if EITHER(FET_ORDER_EFB, FET_ORDER_EFF)        // Hotend, Fan, Bed or Hotend, Fan, Fan
-    #define FAN_PIN                 MOSFET_B_PIN
+    #define FAN0_PIN                MOSFET_B_PIN
   #elif EITHER(FET_ORDER_EEF, FET_ORDER_SF)       // Hotend, Hotend, Fan or Spindle, Fan
-    #define FAN_PIN                 MOSFET_C_PIN
+    #define FAN0_PIN                MOSFET_C_PIN
   #elif FET_ORDER_EEB                             // Hotend, Hotend, Bed
-    #define FAN_PIN                        P1_18  // (4) IO pin. Buffer needed
+    #define FAN0_PIN                       P1_18  // (4) IO pin. Buffer needed
   #else                                           // Non-specific are "EFB" (i.e., "EFBF" or "EFBE")
-    #define FAN_PIN                 MOSFET_B_PIN
+    #define FAN0_PIN                MOSFET_B_PIN
   #endif
 #endif
 
@@ -252,8 +255,8 @@
       #error "LASER_FEATURE requires 3 free servo pins."
     #endif
   #endif
-  #define SPINDLE_LASER_ENA_PIN       SERVO1_PIN  // (6) Pin should have a pullup/pulldown!
   #define SPINDLE_LASER_PWM_PIN       SERVO3_PIN  // (4) MUST BE HARDWARE PWM
+  #define SPINDLE_LASER_ENA_PIN       SERVO1_PIN  // (6) Pin should have a pullup/pulldown!
   #define SPINDLE_DIR_PIN             SERVO2_PIN  // (5)
 #endif
 
@@ -304,7 +307,7 @@
   #define BTN_ENC                          P3_25  // J3-4 & AUX-4
 
   #define LCD_PINS_RS                      P0_15  // J3-9 & AUX-4 (CS)
-  #define LCD_PINS_ENABLE                  P0_18  // J3-10 & AUX-3 (SID, MOSI)
+  #define LCD_PINS_EN                      P0_18  // J3-10 & AUX-3 (SID, MOSI)
   #define LCD_PINS_D4                      P2_06  // J3-8 & AUX-3 (SCK, CLK)
 
 #elif ENABLED(ZONESTAR_LCD)
@@ -397,7 +400,7 @@
     #endif
 
     #define LCD_BACKLIGHT_PIN              P0_16  //(16) J3-7 & AUX-4 - only used on DOGLCD controllers
-    #define LCD_PINS_ENABLE                P0_18  // (51) (MOSI) J3-10 & AUX-3
+    #define LCD_PINS_EN                    P0_18  // (51) (MOSI) J3-10 & AUX-3
     #define LCD_PINS_D4                    P0_15  // (52) (SCK)  J3-9 & AUX-3
     #if IS_ULTIPANEL
       #define LCD_PINS_D5                  P1_17  // (71) ENET_MDIO

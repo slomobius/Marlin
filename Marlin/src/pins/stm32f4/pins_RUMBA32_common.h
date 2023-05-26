@@ -118,7 +118,7 @@
 #define HEATER_2_PIN                        PC8
 #define HEATER_BED_PIN                      PA1
 
-#define FAN_PIN                             PC9
+#define FAN0_PIN                            PC9
 #define FAN1_PIN                            PA8
 
 //
@@ -149,7 +149,7 @@
   #define BTN_ENC                           PE7
 
   #define LCD_PINS_RS                       PE10
-  #define LCD_PINS_ENABLE                   PE9
+  #define LCD_PINS_EN                       PE9
   #define LCD_PINS_D4                       PE12
 
   #if ENABLED(MKS_MINI_12864)

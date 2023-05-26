@@ -94,8 +94,8 @@
 //
 #define HEATER_BED_PIN                     P2_05
 #define HEATER_0_PIN                       P2_07  // FET 1
-#ifndef FAN_PIN
-  #define FAN_PIN                          P2_06  // FET 3
+#ifndef FAN0_PIN
+  #define FAN0_PIN                         P2_06  // FET 3
 #endif
 
 //
@@ -125,7 +125,7 @@
   #define SPINDLE_LASER_ENA_PIN            P2_07  // FET 1
   #undef HEATER_BED_PIN
   #define SPINDLE_LASER_PWM_PIN            P2_05  // Bed FET
-  #undef FAN_PIN
+  #undef FAN0_PIN
   #define SPINDLE_DIR_PIN                  P2_06  // FET 3
 #endif
 
@@ -149,12 +149,12 @@
 
   #define LCD_PINS_RS                      P0_16  // EXP1-4
   #define LCD_SDSS                         P0_28  // EXP2-4
-  #define LCD_PINS_ENABLE                  P0_18  // EXP1-3
+  #define LCD_PINS_EN                      P0_18  // EXP1-3
   #define LCD_PINS_D4                      P0_15  // EXP1-5
 
   #define KILL_PIN                         P2_11  // EXP2-10
 
-  #if ENABLED(SDSUPPORT)
+  #if HAS_MEDIA
     #error "SDSUPPORT is not currently supported by the Cohesion3D boards"
   #endif
 

@@ -174,8 +174,8 @@
 #define HEATER_2_PIN                           8  // D8 PC22 FET_PWM5
 #define HEATER_BED_PIN                         9  // D9 PC21 BED_PWM
 
-#ifndef FAN_PIN
-  #define FAN_PIN                              4  // D4 PC26 FET_PWM1
+#ifndef FAN0_PIN
+  #define FAN0_PIN                             4  // D4 PC26 FET_PWM1
 #endif
 #define FAN1_PIN                               5  // D5 PC25 FET_PWM2
 
@@ -238,7 +238,7 @@
 #if ANY(HAS_WIRED_LCD, TOUCH_UI_ULTIPANEL, TOUCH_UI_FTDI_EVE)
   #define BEEPER_PIN                          23  // D24 PA15_CTS1
   #define LCD_PINS_RS                         17  // D17 PA12_RXD1
-  #define LCD_PINS_ENABLE                     24  // D23 PA14_RTS1
+  #define LCD_PINS_EN                         24  // D23 PA14_RTS1
   #define LCD_PINS_D4                         69  // D69 PA0_CANTX0
   #define LCD_PINS_D5                         54  // D54 PA16_SCK1
   #define LCD_PINS_D6                         68  // D68 PA1_CANRX0

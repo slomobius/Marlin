@@ -197,7 +197,10 @@
   #define E1_SERIAL_RX_PIN      E1_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
-  #define TMC_BAUD_RATE                    19200
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
 #endif // HAS_TMC_UART
 
 //
@@ -231,8 +234,8 @@
     #define FAN2_PIN                       P2_06  // HE1 for FAN3
   #endif
 #endif
-#ifndef FAN_PIN
-  #define FAN_PIN                          P2_04  // FAN1
+#ifndef FAN0_PIN
+  #define FAN0_PIN                         P2_04  // FAN1
 #endif
 #ifndef FAN1_PIN
   #define FAN1_PIN                         P1_04  // FAN2
@@ -318,7 +321,7 @@
     #define BTN_EN1                  EXP1_03_PIN
     #define BTN_EN2                  EXP1_05_PIN
 
-    #define LCD_PINS_ENABLE          EXP1_08_PIN
+    #define LCD_PINS_EN              EXP1_08_PIN
     #define LCD_PINS_D4              EXP1_06_PIN
 
   #else
@@ -357,7 +360,7 @@
       #define TOUCH_BUTTONS_HW_SPI_DEVICE      2
 
       // Disable any LCD related PINs config
-      #define LCD_PINS_ENABLE              -1
+      #define LCD_PINS_EN                  -1
       #define LCD_PINS_RS                  -1
 
       #ifndef TFT_BUFFER_SIZE
@@ -371,7 +374,7 @@
 
       #define LCD_PINS_RS            EXP1_04_PIN
 
-      #define LCD_PINS_ENABLE        EXP1_03_PIN
+      #define LCD_PINS_EN            EXP1_03_PIN
       #define LCD_PINS_D4            EXP1_05_PIN
 
       #if ENABLED(FYSETC_MINI_12864)
