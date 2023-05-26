@@ -174,8 +174,11 @@
   #define E4_SERIAL_RX_PIN      E4_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
-  #define TMC_BAUD_RATE                    19200
-#endif
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
+#endif // HAS_TMC_UART
 
 //
 // Temperature Sensors
@@ -193,7 +196,7 @@
 #define HEATER_2_PIN                        PA3   // HE2
 #define HEATER_BED_PIN                      PB10  // H-BED
 
-#define FAN_PIN                             PA2   // FAN0
+#define FAN0_PIN                            PA2   // FAN0
 #define FAN1_PIN                            PA1   // FAN1
 #define FAN2_PIN                            PA0   // FAN2
 
@@ -237,7 +240,7 @@
 #define EXP2_07_PIN                         PB11
 #define EXP2_08_PIN                         -1    // RESET
 
-#if ENABLED(SDSUPPORT)
+#if HAS_MEDIA
   #ifndef SDCARD_CONNECTION
     #define SDCARD_CONNECTION            ONBOARD
   #endif
@@ -310,7 +313,7 @@
 
 #elif HAS_WIRED_LCD
 
-  #define LCD_PINS_ENABLE            EXP1_03_PIN
+  #define LCD_PINS_EN                EXP1_03_PIN
   #define LCD_PINS_RS                EXP1_04_PIN
   #define LCD_BACKLIGHT_PIN                 -1
 

@@ -48,7 +48,3 @@
 #if USING_PULLDOWNS
   #error "PULLDOWN pin mode is not available for Teensy 3.5/3.6."
 #endif
-
-#if USING_PULLDOWNS
-  #error "PULLDOWN pin mode is not available on Teensy 3.5/3.6 boards."
-#endif
