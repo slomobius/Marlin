@@ -1177,11 +1177,11 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 500, 500, 10, 120 }
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 10, 150 }
 
 #define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
-  #define MAX_FEEDRATE_EDIT_VALUES    { 1000, 1000, 20, 150 } // ...or, set your own edit limits
+  #define MAX_FEEDRATE_EDIT_VALUES    { 1000, 1000, 20, 250 } // ...or, set your own edit limits
 #endif
 
 /**
@@ -1485,7 +1485,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -45, -12, -2.75 }
+#define NOZZLE_TO_PROBE_OFFSET { -45, -12, -3.22 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -2034,7 +2034,7 @@
   #define BED_TRAMMING_INSET_LFRB { 30, 30, 30, 30 } // (mm) Left, Front, Right, Back insets
   #define BED_TRAMMING_HEIGHT      0.0        // (mm) Z height of nozzle at leveling points
   #define BED_TRAMMING_Z_HOP       4.0        // (mm) Z height of nozzle between leveling points
-  //#define BED_TRAMMING_INCLUDE_CENTER       // Move to the center after the last corner
+  #define BED_TRAMMING_INCLUDE_CENTER       // Move to the center after the last corner
   //#define BED_TRAMMING_USE_PROBE
   #if ENABLED(BED_TRAMMING_USE_PROBE)
     #define BED_TRAMMING_PROBE_TOLERANCE 0.1  // (mm)
