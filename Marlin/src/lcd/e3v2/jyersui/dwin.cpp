@@ -38,6 +38,7 @@
 #include "../../../module/planner.h"
 #include "../../../module/settings.h"
 #include "../../../libs/buzzer.h"
+#include "../../../inc/Conditionals_post.h"
 
 //#define DEBUG_OUT 1
 #include "../../../core/debug_out.h"
@@ -95,7 +96,7 @@
 #define MENU_CHAR_LIMIT  24
 #define STATUS_Y 352
 
-#define MAX_PRINT_SPEED   500
+#define MAX_PRINT_SPEED   999
 #define MIN_PRINT_SPEED   10
 
 #if HAS_FAN
@@ -115,7 +116,7 @@
 #endif
 
 #if HAS_HOTEND
-  #define MAX_FLOW_RATE   200
+  #define MAX_FLOW_RATE   299
   #define MIN_FLOW_RATE   10
 
   #define MAX_E_TEMP    (HEATER_0_MAXTEMP - HOTEND_OVERSHOOT)
@@ -126,11 +127,6 @@
   #define MAX_BED_TEMP  BED_MAXTEMP
   #define MIN_BED_TEMP  0
 #endif
-
-#define FEEDRATE_UNIT 1
-#define ACCELERATION_UNIT 1
-#define JERK_UNIT 10
-#define STEPS_UNIT 10
 
 /**
  * Custom menu items with jyersLCD
@@ -159,6 +155,13 @@ constexpr uint16_t TROWS = 6, MROWS = TROWS - 1,
                    MENU_CHR_W = 8, MENU_CHR_H = 16, STAT_CHR_W = 10;
 
 #define MBASE(L) (49 + MLINE * (L))
+
+constexpr float default_max_feedrate[]        = DEFAULT_MAX_FEEDRATE;
+constexpr float default_max_acceleration[]    = DEFAULT_MAX_ACCELERATION;
+constexpr float default_steps[]               = DEFAULT_AXIS_STEPS_PER_UNIT;
+#if HAS_CLASSIC_JERK
+  constexpr float default_max_jerk[]            = { DEFAULT_XJERK, DEFAULT_YJERK, DEFAULT_ZJERK, DEFAULT_EJERK };
+#endif
 
 enum SelectItem : uint8_t {
   PAGE_PRINT = 0,
@@ -413,7 +416,7 @@ private:
 
         // Draw value text on
         if (viewer_print_value) {
-          int8_t offset_x, offset_y = cell_height_px / 2 - 6;
+          const int8_t offset_y = cell_height_px / 2 - 6;
           if (isnan(bedlevel.z_values[x][y])) {  // undefined
             DWIN_Draw_String(false, font6x12, Color_White, Color_Bg_Blue, start_x_px + cell_width_px / 2 - 5, start_y_px + offset_y, F("X"));
           }
@@ -422,7 +425,7 @@ private:
               sprintf_P(buf, PSTR("%s"), dtostrf(abs(bedlevel.z_values[x][y]), 1, 2, str_1));
             else
               sprintf_P(buf, PSTR("%02i"), (uint16_t)(abs(bedlevel.z_values[x][y] - (int16_t)bedlevel.z_values[x][y]) * 100));
-            offset_x = cell_width_px / 2 - 3 * (strlen(buf)) - 2;
+            const int8_t offset_x = cell_width_px / 2 - 3 * (strlen(buf)) - 2;
             if (!(GRID_MAX_POINTS_X < 10))
               DWIN_Draw_String(false, font6x12, Color_White, Color_Bg_Blue, start_x_px - 2 + offset_x, start_y_px + offset_y /*+ square / 2 - 6*/, F("."));
             DWIN_Draw_String(false, font6x12, Color_White, Color_Bg_Blue, start_x_px + 1 + offset_x, start_y_px + offset_y /*+ square / 2 - 6*/, buf);
@@ -594,7 +597,7 @@ void CrealityDWINClass::Draw_Menu(const uint8_t menu, const uint8_t select/*=0*/
   active_menu = menu;
   Clear_Screen();
   Draw_Title(Get_Menu_Title(menu));
-  LOOP_L_N(i, TROWS) Menu_Item_Handler(menu, i + scrollpos);
+  for (uint8_t i = 0; i < TROWS; ++i) Menu_Item_Handler(menu, i + scrollpos);
   DWIN_Draw_Rectangle(1, GetColor(eeprom_settings.cursor_color, Rectangle_Color), 0, MBASE(selection - scrollpos) - 18, 14, MBASE(selection - scrollpos) + 33);
 }
 
@@ -807,16 +810,16 @@ void CrealityDWINClass::Draw_SD_Item(const uint8_t item, const uint8_t row) {
   else {
     card.selectFileByIndexSorted(item - 1);
     char * const filename = card.longest_filename();
-    size_t max = MENU_CHAR_LIMIT;
-    size_t pos = strlen(filename), len = pos;
+    constexpr uint8_t max = MENU_CHAR_LIMIT;
+    uint8_t pos = strlen(filename), len = pos;
     if (!card.flag.filenameIsDir)
       while (pos && filename[pos] != '.') pos--;
     len = pos;
     if (len > max) len = max;
     char name[len + 1];
-    LOOP_L_N(i, len) name[i] = filename[i];
+    for (uint8_t i = 0; i < len; ++i) name[i] = filename[i];
     if (pos > max)
-      LOOP_S_L_N(i, len - 3, len) name[i] = '.';
+      for (uint8_t i = len - 3; i < len; ++i) name[i] = '.';
     name[len] = '\0';
     Draw_Menu_Item(row, card.flag.filenameIsDir ? ICON_More : ICON_File, name);
   }
@@ -829,7 +832,7 @@ void CrealityDWINClass::Draw_SD_List(const bool removed/*=false*/) {
   scrollpos = 0;
   process = File;
   if (card.isMounted() && !removed) {
-    LOOP_L_N(i, _MIN(card.get_num_items() + 1, TROWS))
+    for (int16_t i = 0; i < _MIN(card.get_num_items() + 1, TROWS); ++i)
       Draw_SD_Item(i, i);
   }
   else {
@@ -1035,7 +1038,9 @@ void CrealityDWINClass::Update_Status_Bar(const bool refresh/*=false*/) {
   }
 }
 
-/* Menu Item Config */
+//
+// Menu Item Config
+//
 
 void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item, bool draw/*=true*/) {
   const uint8_t row = item - scrollpos;
@@ -1104,7 +1109,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
       #define PREPARE_MANUALLEVEL (PREPARE_HOME + 1)
       #define PREPARE_ZOFFSET (PREPARE_MANUALLEVEL + ENABLED(HAS_ZOFFSET_ITEM))
       #define PREPARE_PREHEAT (PREPARE_ZOFFSET + ENABLED(HAS_PREHEAT))
-      #define PREPARE_COOLDOWN (PREPARE_PREHEAT + EITHER(HAS_HOTEND, HAS_HEATED_BED))
+      #define PREPARE_COOLDOWN (PREPARE_PREHEAT + ANY(HAS_HOTEND, HAS_HEATED_BED))
       #define PREPARE_CHANGEFIL (PREPARE_COOLDOWN + ENABLED(ADVANCED_PAUSE_FEATURE))
       #define PREPARE_CUSTOM_MENU (PREPARE_CHANGEFIL + ENABLED(HAS_CUSTOM_MENU))
       #define PREPARE_TOTAL PREPARE_CUSTOM_MENU
@@ -1407,13 +1412,6 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
       static float mlev_z_pos = 0;
       static bool use_probe = false;
 
-      #if HAS_BED_PROBE
-        constexpr float probe_x_min = _MAX(0 + corner_pos, X_MIN_POS + probe.offset.x, X_MIN_POS + PROBING_MARGIN) - probe.offset.x,
-                        probe_x_max = _MIN((X_BED_SIZE + X_MIN_POS) - corner_pos, X_MAX_POS + probe.offset.x, X_MAX_POS - PROBING_MARGIN) - probe.offset.x,
-                        probe_y_min = _MAX(0 + corner_pos, Y_MIN_POS + probe.offset.y, Y_MIN_POS + PROBING_MARGIN) - probe.offset.y,
-                        probe_y_max = _MIN((Y_BED_SIZE + Y_MIN_POS) - corner_pos, Y_MAX_POS + probe.offset.y, Y_MAX_POS - PROBING_MARGIN) - probe.offset.y;
-      #endif
-
       switch (item) {
         case MLEVEL_BACK:
           if (draw)
@@ -1430,22 +1428,19 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
               Draw_Checkbox(row, use_probe);
             }
             else {
-              use_probe ^= true;
+              use_probe = !use_probe;
               Draw_Checkbox(row, use_probe);
               if (use_probe) {
                 Popup_Handler(Level);
-                constexpr struct { xy_pos_t p, ProbePtRaise r } points[] = {
-                  { { probe_x_min, probe_y_min }, PROBE_PT_RAISE },
-                  { { probe_x_min, probe_y_max }, PROBE_PT_RAISE },
-                  { { probe_x_max, probe_y_max }, PROBE_PT_RAISE },
-                  { { probe_x_max, probe_y_min }, PROBE_PT_STOW }
-                };
                 corner_avg = 0;
-                for (uint8_t i = 0; i < COUNT(points); i++) {
-                  const float mz = probe.probe_at_point(points[i].p, points[i].r, 0, false);
-                  if (isnan(mz)) { corner_avg = 0; break; }
-                  corner_avg += mz;
-                }
+                #define PROBE_X_MIN _MAX(0 + corner_pos, X_MIN_POS + probe.offset.x, X_MIN_POS + PROBING_MARGIN) - probe.offset.x
+                #define PROBE_X_MAX _MIN((X_BED_SIZE + X_MIN_POS) - corner_pos, X_MAX_POS + probe.offset.x, X_MAX_POS - PROBING_MARGIN) - probe.offset.x
+                #define PROBE_Y_MIN _MAX(0 + corner_pos, Y_MIN_POS + probe.offset.y, Y_MIN_POS + PROBING_MARGIN) - probe.offset.y
+                #define PROBE_Y_MAX _MIN((Y_BED_SIZE + Y_MIN_POS) - corner_pos, Y_MAX_POS + probe.offset.y, Y_MAX_POS - PROBING_MARGIN) - probe.offset.y
+                corner_avg += probe.probe_at_point(PROBE_X_MIN, PROBE_Y_MIN, PROBE_PT_RAISE, 0, false);
+                corner_avg += probe.probe_at_point(PROBE_X_MIN, PROBE_Y_MAX, PROBE_PT_RAISE, 0, false);
+                corner_avg += probe.probe_at_point(PROBE_X_MAX, PROBE_Y_MAX, PROBE_PT_RAISE, 0, false);
+                corner_avg += probe.probe_at_point(PROBE_X_MAX, PROBE_Y_MIN, PROBE_PT_STOW, 0, false);
                 corner_avg /= 4;
                 Redraw_Menu();
               }
@@ -1459,7 +1454,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             Popup_Handler(MoveWait);
             if (use_probe) {
               #if HAS_BED_PROBE
-                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(probe_x_min, 1, 3, str_1), dtostrf(probe_y_min, 1, 3, str_2));
+                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(PROBE_X_MIN, 1, 3, str_1), dtostrf(PROBE_Y_MIN, 1, 3, str_2));
                 gcode.process_subcommands_now(cmd);
                 planner.synchronize();
                 Popup_Handler(ManualProbing);
@@ -1480,7 +1475,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             Popup_Handler(MoveWait);
             if (use_probe) {
               #if HAS_BED_PROBE
-                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(probe_x_min, 1, 3, str_1), dtostrf(probe_y_max, 1, 3, str_2));
+                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(PROBE_X_MIN, 1, 3, str_1), dtostrf(PROBE_Y_MAX, 1, 3, str_2));
                 gcode.process_subcommands_now(cmd);
                 planner.synchronize();
                 Popup_Handler(ManualProbing);
@@ -1501,7 +1496,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             Popup_Handler(MoveWait);
             if (use_probe) {
               #if HAS_BED_PROBE
-                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(probe_x_max, 1, 3, str_1), dtostrf(probe_y_max, 1, 3, str_2));
+                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(PROBE_X_MAX, 1, 3, str_1), dtostrf(PROBE_Y_MAX, 1, 3, str_2));
                 gcode.process_subcommands_now(cmd);
                 planner.synchronize();
                 Popup_Handler(ManualProbing);
@@ -1522,7 +1517,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             Popup_Handler(MoveWait);
             if (use_probe) {
               #if HAS_BED_PROBE
-                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(probe_x_max, 1, 3, str_1), dtostrf(probe_y_min, 1, 3, str_2));
+                sprintf_P(cmd, PSTR("G0 F4000\nG0 Z10\nG0 X%s Y%s"), dtostrf(PROBE_X_MAX, 1, 3, str_1), dtostrf(PROBE_Y_MIN, 1, 3, str_2));
                 gcode.process_subcommands_now(cmd);
                 planner.synchronize();
                 Popup_Handler(ManualProbing);
@@ -2363,25 +2358,23 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
           else
             Draw_Menu(Motion, MOTION_SPEED);
           break;
-        #if HAS_X_AXIS
-          case SPEED_X:
-            if (draw) {
-              Draw_Menu_Item(row, ICON_MaxSpeedX, F("X Axis"));
-              Draw_Float(planner.settings.max_feedrate_mm_s[X_AXIS], row, false, FEEDRATE_UNIT);
-            }
-            else
-              Modify_Value(planner.settings.max_feedrate_mm_s[X_AXIS], min_feedrate_edit_values.x, max_feedrate_edit_values.x, FEEDRATE_UNIT);
-            break;
-        #endif
+        case SPEED_X:
+          if (draw) {
+            Draw_Menu_Item(row, ICON_MaxSpeedX, F("X Axis"));
+            Draw_Float(planner.settings.max_feedrate_mm_s[X_AXIS], row, false, 1);
+          }
+          else
+            Modify_Value(planner.settings.max_feedrate_mm_s[X_AXIS], 0, default_max_feedrate[X_AXIS] * 2, 1);
+          break;
 
         #if HAS_Y_AXIS
           case SPEED_Y:
             if (draw) {
               Draw_Menu_Item(row, ICON_MaxSpeedY, F("Y Axis"));
-              Draw_Float(planner.settings.max_feedrate_mm_s[Y_AXIS], row, false, FEEDRATE_UNIT);
+              Draw_Float(planner.settings.max_feedrate_mm_s[Y_AXIS], row, false, 1);
             }
             else
-              Modify_Value(planner.settings.max_feedrate_mm_s[Y_AXIS], min_feedrate_edit_values.y, max_feedrate_edit_values.y, FEEDRATE_UNIT);
+              Modify_Value(planner.settings.max_feedrate_mm_s[Y_AXIS], 0, default_max_feedrate[Y_AXIS] * 2, 1);
             break;
         #endif
 
@@ -2389,10 +2382,10 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
           case SPEED_Z:
             if (draw) {
               Draw_Menu_Item(row, ICON_MaxSpeedZ, F("Z Axis"));
-              Draw_Float(planner.settings.max_feedrate_mm_s[Z_AXIS], row, false, FEEDRATE_UNIT);
+              Draw_Float(planner.settings.max_feedrate_mm_s[Z_AXIS], row, false, 1);
             }
             else
-              Modify_Value(planner.settings.max_feedrate_mm_s[Z_AXIS], min_feedrate_edit_values.z, max_feedrate_edit_values.z, FEEDRATE_UNIT);
+              Modify_Value(planner.settings.max_feedrate_mm_s[Z_AXIS], 0, default_max_feedrate[Z_AXIS] * 2, 1);
             break;
         #endif
 
@@ -2400,10 +2393,10 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
           case SPEED_E:
             if (draw) {
               Draw_Menu_Item(row, ICON_MaxSpeedE, F("Extruder"));
-              Draw_Float(planner.settings.max_feedrate_mm_s[E_AXIS], row, false, FEEDRATE_UNIT);
+              Draw_Float(planner.settings.max_feedrate_mm_s[E_AXIS], row, false, 1);
             }
             else
-              Modify_Value(planner.settings.max_feedrate_mm_s[E_AXIS], min_feedrate_edit_values.e, max_feedrate_edit_values.e, FEEDRATE_UNIT);
+              Modify_Value(planner.settings.max_feedrate_mm_s[E_AXIS], 0, default_max_feedrate[E_AXIS] * 2, 1);
             break;
         #endif
       }
@@ -2428,35 +2421,35 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
         case ACCEL_X:
           if (draw) {
             Draw_Menu_Item(row, ICON_MaxAccX, F("X Axis"));
-            Draw_Float(planner.settings.max_acceleration_mm_per_s2[X_AXIS], row, false, ACCELERATION_UNIT);
+            Draw_Float(planner.settings.max_acceleration_mm_per_s2[X_AXIS], row, false, 1);
           }
           else
-            Modify_Value(planner.settings.max_acceleration_mm_per_s2[X_AXIS], min_acceleration_edit_values.x, max_acceleration_edit_values.x, ACCELERATION_UNIT);
+            Modify_Value(planner.settings.max_acceleration_mm_per_s2[X_AXIS], 0, default_max_acceleration[X_AXIS] * 2, 1);
           break;
         case ACCEL_Y:
           if (draw) {
             Draw_Menu_Item(row, ICON_MaxAccY, F("Y Axis"));
-            Draw_Float(planner.settings.max_acceleration_mm_per_s2[Y_AXIS], row, false, ACCELERATION_UNIT);
+            Draw_Float(planner.settings.max_acceleration_mm_per_s2[Y_AXIS], row, false, 1);
           }
           else
-            Modify_Value(planner.settings.max_acceleration_mm_per_s2[Y_AXIS], min_acceleration_edit_values.y, max_acceleration_edit_values.y, ACCELERATION_UNIT);
+            Modify_Value(planner.settings.max_acceleration_mm_per_s2[Y_AXIS], 0, default_max_acceleration[Y_AXIS] * 2, 1);
           break;
         case ACCEL_Z:
           if (draw) {
             Draw_Menu_Item(row, ICON_MaxAccZ, F("Z Axis"));
-            Draw_Float(planner.settings.max_acceleration_mm_per_s2[Z_AXIS], row, false, ACCELERATION_UNIT);
+            Draw_Float(planner.settings.max_acceleration_mm_per_s2[Z_AXIS], row, false, 1);
           }
           else
-            Modify_Value(planner.settings.max_acceleration_mm_per_s2[Z_AXIS], min_acceleration_edit_values.z, max_acceleration_edit_values.z, ACCELERATION_UNIT);
+            Modify_Value(planner.settings.max_acceleration_mm_per_s2[Z_AXIS], 0, default_max_acceleration[Z_AXIS] * 2, 1);
           break;
         #if HAS_HOTEND
           case ACCEL_E:
             if (draw) {
               Draw_Menu_Item(row, ICON_MaxAccE, F("Extruder"));
-              Draw_Float(planner.settings.max_acceleration_mm_per_s2[E_AXIS], row, false, ACCELERATION_UNIT);
+              Draw_Float(planner.settings.max_acceleration_mm_per_s2[E_AXIS], row, false, 1);
             }
             else
-              Modify_Value(planner.settings.max_acceleration_mm_per_s2[E_AXIS], min_acceleration_edit_values.e, max_acceleration_edit_values.e, ACCELERATION_UNIT);
+              Modify_Value(planner.settings.max_acceleration_mm_per_s2[E_AXIS], 0, default_max_acceleration[E_AXIS] * 2, 1);
             break;
         #endif
       }
@@ -2478,44 +2471,38 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             else
               Draw_Menu(Motion, MOTION_JERK);
             break;
-          #if HAS_X_AXIS
-            case JERK_X:
-              if (draw) {
-                Draw_Menu_Item(row, ICON_MaxSpeedJerkX, F("X Axis"));
-                Draw_Float(planner.max_jerk.x, row, false, JERK_UNIT);
-              }
-              else
-                Modify_Value(planner.max_jerk.x, min_jerk_edit_values.x, max_jerk_edit_values.x, JERK_UNIT);
-              break;
-          #endif
-          #if HAS_Y_AXIS
-            case JERK_Y:
-              if (draw) {
-                Draw_Menu_Item(row, ICON_MaxSpeedJerkY, F("Y Axis"));
-                Draw_Float(planner.max_jerk.y, row, false, JERK_UNIT);
-              }
-              else
-                Modify_Value(planner.max_jerk.y, min_jerk_edit_values.y, max_jerk_edit_values.y, JERK_UNIT);
-              break;
-          #endif
-          #if HAS_Z_AXIS
-            case JERK_Z:
-              if (draw) {
-                Draw_Menu_Item(row, ICON_MaxSpeedJerkZ, F("Z Axis"));
-                Draw_Float(planner.max_jerk.z, row, false, JERK_UNIT);
-              }
-              else
-                Modify_Value(planner.max_jerk.z, min_jerk_edit_values.z, max_jerk_edit_values.z, JERK_UNIT);
-              break;
-          #endif
+          case JERK_X:
+            if (draw) {
+              Draw_Menu_Item(row, ICON_MaxSpeedJerkX, F("X Axis"));
+              Draw_Float(planner.max_jerk.x, row, false, 10);
+            }
+            else
+              Modify_Value(planner.max_jerk.x, 0, default_max_jerk[X_AXIS] * 2, 10);
+            break;
+          case JERK_Y:
+            if (draw) {
+              Draw_Menu_Item(row, ICON_MaxSpeedJerkY, F("Y Axis"));
+              Draw_Float(planner.max_jerk.y, row, false, 10);
+            }
+            else
+              Modify_Value(planner.max_jerk.y, 0, default_max_jerk[Y_AXIS] * 2, 10);
+            break;
+          case JERK_Z:
+            if (draw) {
+              Draw_Menu_Item(row, ICON_MaxSpeedJerkZ, F("Z Axis"));
+              Draw_Float(planner.max_jerk.z, row, false, 10);
+            }
+            else
+              Modify_Value(planner.max_jerk.z, 0, default_max_jerk[Z_AXIS] * 2, 10);
+            break;
           #if HAS_HOTEND
             case JERK_E:
               if (draw) {
                 Draw_Menu_Item(row, ICON_MaxSpeedJerkE, F("Extruder"));
-                Draw_Float(planner.max_jerk.e, row, false, JERK_UNIT);
+                Draw_Float(planner.max_jerk.e, row, false, 10);
               }
               else
-                Modify_Value(planner.max_jerk.e, min_jerk_edit_values.e, max_jerk_edit_values.e, JERK_UNIT);
+                Modify_Value(planner.max_jerk.e, 0, default_max_jerk[E_AXIS] * 2, 10);
               break;
           #endif
         }
@@ -2537,44 +2524,38 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
           else
             Draw_Menu(Motion, MOTION_STEPS);
           break;
-        #if HAS_X_AXIS
-          case STEPS_X:
-            if (draw) {
-              Draw_Menu_Item(row, ICON_StepX, F("X Axis"));
-              Draw_Float(planner.settings.axis_steps_per_mm[X_AXIS], row, false, STEPS_UNIT);
-            }
-            else
-              Modify_Value(planner.settings.axis_steps_per_mm[X_AXIS], min_steps_edit_values.x, max_steps_edit_values.x, STEPS_UNIT);
-            break;
-        #endif
-        #if HAS_Y_AXIS
-          case STEPS_Y:
-            if (draw) {
-              Draw_Menu_Item(row, ICON_StepY, F("Y Axis"));
-              Draw_Float(planner.settings.axis_steps_per_mm[Y_AXIS], row, false, STEPS_UNIT);
-            }
-            else
-              Modify_Value(planner.settings.axis_steps_per_mm[Y_AXIS], min_steps_edit_values.y, max_steps_edit_values.y, STEPS_UNIT);
-            break;
-        #endif
-        #if HAS_Z_AXIS
-          case STEPS_Z:
-            if (draw) {
-              Draw_Menu_Item(row, ICON_StepZ, F("Z Axis"));
-              Draw_Float(planner.settings.axis_steps_per_mm[Z_AXIS], row, false, STEPS_UNIT);
-            }
-            else
-              Modify_Value(planner.settings.axis_steps_per_mm[Z_AXIS], min_steps_edit_values.z, max_steps_edit_values.z, STEPS_UNIT);
-            break;
-        #endif
+        case STEPS_X:
+          if (draw) {
+            Draw_Menu_Item(row, ICON_StepX, F("X Axis"));
+            Draw_Float(planner.settings.axis_steps_per_mm[X_AXIS], row, false, 10);
+          }
+          else
+            Modify_Value(planner.settings.axis_steps_per_mm[X_AXIS], 0, default_steps[X_AXIS] * 2, 10);
+          break;
+        case STEPS_Y:
+          if (draw) {
+            Draw_Menu_Item(row, ICON_StepY, F("Y Axis"));
+            Draw_Float(planner.settings.axis_steps_per_mm[Y_AXIS], row, false, 10);
+          }
+          else
+            Modify_Value(planner.settings.axis_steps_per_mm[Y_AXIS], 0, default_steps[Y_AXIS] * 2, 10);
+          break;
+        case STEPS_Z:
+          if (draw) {
+            Draw_Menu_Item(row, ICON_StepZ, F("Z Axis"));
+            Draw_Float(planner.settings.axis_steps_per_mm[Z_AXIS], row, false, 10);
+          }
+          else
+            Modify_Value(planner.settings.axis_steps_per_mm[Z_AXIS], 0, default_steps[Z_AXIS] * 2, 10);
+          break;
         #if HAS_HOTEND
           case STEPS_E:
             if (draw) {
               Draw_Menu_Item(row, ICON_StepE, F("Extruder"));
-              Draw_Float(planner.settings.axis_steps_per_mm[E_AXIS], row, false, STEPS_UNIT);
+              Draw_Float(planner.settings.axis_steps_per_mm[E_AXIS], row, false, 10);
             }
             else
-              Modify_Value(planner.settings.axis_steps_per_mm[E_AXIS], min_steps_edit_values.e, max_steps_edit_values.e, STEPS_UNIT);
+              Modify_Value(planner.settings.axis_steps_per_mm[E_AXIS], 0, 1000, 10);
             break;
         #endif
       }
@@ -3081,7 +3062,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
 
         #define LEVELING_BACK 0
         #define LEVELING_ACTIVE (LEVELING_BACK + 1)
-        #define LEVELING_GET_TILT (LEVELING_ACTIVE + BOTH(HAS_BED_PROBE, AUTO_BED_LEVELING_UBL))
+        #define LEVELING_GET_TILT (LEVELING_ACTIVE + ALL(HAS_BED_PROBE, AUTO_BED_LEVELING_UBL))
         #define LEVELING_GET_MESH (LEVELING_GET_TILT + 1)
         #define LEVELING_MANUAL (LEVELING_GET_MESH + 1)
         #define LEVELING_VIEW (LEVELING_MANUAL + 1)
@@ -3116,7 +3097,7 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
               Draw_Checkbox(row, planner.leveling_active);
             }
             break;
-          #if BOTH(HAS_BED_PROBE, AUTO_BED_LEVELING_UBL)
+          #if ALL(HAS_BED_PROBE, AUTO_BED_LEVELING_UBL)
             case LEVELING_GET_TILT:
               if (draw)
                 Draw_Menu_Item(row, ICON_Tilt, F("Autotilt Current Mesh"));
@@ -3929,7 +3910,6 @@ void CrealityDWINClass::Menu_Item_Handler(const uint8_t menu, const uint8_t item
             }
             break;
 
-
           #define _PREHEAT_HOTEND_CASE(N) \
             case PREHEATHOTEND_##N: \
               if (draw) Draw_Menu_Item(row, ICON_Temperature, F(PREHEAT_## N ##_LABEL)); \
@@ -4175,7 +4155,7 @@ void CrealityDWINClass::Menu_Control() {
   if (encoder_diffState == ENCODER_DIFF_CW && selection < Get_Menu_Size(active_menu)) {
     DWIN_Draw_Rectangle(1, Color_Bg_Black, 0, MBASE(selection - scrollpos) - 18, 14, MBASE(selection - scrollpos) + 33);
     selection++; // Select Down
-    if (selection > scrollpos+MROWS) {
+    if (selection > scrollpos + MROWS) {
       scrollpos++;
       DWIN_Frame_AreaMove(1, 2, MLINE, Color_Bg_Black, 0, 31, DWIN_WIDTH, 349);
       Menu_Item_Handler(active_menu, selection);
@@ -4601,7 +4581,9 @@ void CrealityDWINClass::Confirm_Control() {
   DWIN_UpdateLCD();
 }
 
-/* In-Menu Value Modification */
+//
+// In-Menu Value Modification
+//
 
 void CrealityDWINClass::Setup_Value(const_float_t value, const_float_t min, const_float_t max, const_float_t unit, const uint8_t type) {
   if (TERN0(HAS_HOTEND, valuepointer == &thermalManager.temp_hotend[0].pid.Ki) || TERN0(HAS_HEATED_BED, valuepointer == &thermalManager.temp_bed.pid.Ki))
@@ -4660,16 +4642,18 @@ void CrealityDWINClass::Modify_Option(const uint8_t value, const char * const * 
   Draw_Option(value, options, selection - scrollpos, true);
 }
 
-/* Main Functions */
+//
+// Main Functions
+//
 
 void CrealityDWINClass::Update_Status(const char * const text) {
   if (strncmp_P(text, PSTR("<F>"), 3) == 0) {
-    LOOP_L_N(i, _MIN((size_t)LONG_FILENAME_LENGTH, strlen(text))) filename[i] = text[i + 3];
+    for (uint8_t i = 0; i < _MIN((size_t)LONG_FILENAME_LENGTH, strlen(text)); ++i) filename[i] = text[i + 3];
     filename[_MIN((size_t)LONG_FILENAME_LENGTH - 1, strlen(text))] = '\0';
     Draw_Print_Filename(true);
   }
   else {
-    LOOP_L_N(i, _MIN((size_t)64, strlen(text))) statusmsg[i] = text[i];
+    for (uint8_t i = 0; i < _MIN((size_t)64, strlen(text)); ++i) statusmsg[i] = text[i];
     statusmsg[_MIN((size_t)64, strlen(text))] = '\0';
   }
 }

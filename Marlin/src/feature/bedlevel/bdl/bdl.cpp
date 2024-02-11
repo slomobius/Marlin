@@ -109,7 +109,7 @@ void BDS_Leveling::process() {
           #endif
         }
         else {
-          babystep.set_mm(Z_AXIS, 0);          //if (old_cur_z <= cur_z) Z_DIR_WRITE(HIGH);
+          babystep.set_mm(Z_AXIS, 0);          //if (old_cur_z <= cur_z) Z_DIR_WRITE(!INVERT_Z_DIR);
           stepper.apply_directions();
         }
       #endif
@@ -150,7 +150,7 @@ void BDS_Leveling::process() {
       if (config_state == -6) {
         //BD_I2C_SENSOR.BD_i2c_write(1019); // begin calibrate
         //delay(1000);
-        gcode.stepper_inactive_time = SEC_TO_MS(60 * 5);
+        TERN_(HAS_DISABLE_IDLE_AXES, gcode.stepper_inactive_time = SEC_TO_MS(60 * 5));
         gcode.process_subcommands_now(F("M17 Z"));
         gcode.process_subcommands_now(F("G1 Z0.0"));
         z_pose = 0;

@@ -33,9 +33,12 @@
 #include "../../lcd/marlinui.h"
 #include "../../module/motion.h"
 #include "../../module/planner.h"
-#include "../../module/tool_change.h"
 #include "../../module/endstops.h"
 #include "../../feature/bedlevel/bedlevel.h"
+
+#if HAS_MULTI_HOTEND
+  #include "../../module/tool_change.h"
+#endif
 
 #if !AXIS_CAN_CALIBRATE(X)
   #undef CALIBRATION_MEASURE_LEFT
@@ -171,7 +174,7 @@ inline void park_above_object(measurements_t &m, const float uncertainty) {
 #if HAS_HOTEND_OFFSET
 
   inline void normalize_hotend_offsets() {
-    LOOP_S_L_N(e, 1, HOTENDS)
+    for (uint8_t e = 1; e < HOTENDS; ++e)
       hotend_offset[e] -= hotend_offset[0];
     hotend_offset[0].reset();
   }
@@ -618,7 +621,7 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
     // This function requires normalize_hotend_offsets() to be called
     //
     inline void report_hotend_offsets() {
-      LOOP_S_L_N(e, 1, HOTENDS)
+      for (uint8_t e = 1; e < HOTENDS; ++e)
         SERIAL_ECHOLNPGM_P(PSTR("T"), e, PSTR(" Hotend Offset X"), hotend_offset[e].x, SP_Y_STR, hotend_offset[e].y, SP_Z_STR, hotend_offset[e].z);
     }
   #endif

@@ -56,7 +56,7 @@
 //#define BOGUS_TEMPERATURE_GRACE_PERIOD    2000
 
 // Enable EEPROM Emulation for this board as it doesn't have EEPROM
-#if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
   #define FLASH_EEPROM_EMULATION
   #define MARLIN_EEPROM_SIZE              0x1000  // 4K
 #endif
@@ -139,6 +139,7 @@
 //
 // LCD / Controller
 //
+
 #if HAS_WIRED_LCD
 
   #if IS_RRD_SC

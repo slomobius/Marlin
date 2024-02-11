@@ -51,7 +51,7 @@
 #define E2END                             0xFFFF  // EEPROM end address AT24C256 (32kB)
 */
 
-#if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
   #define FLASH_EEPROM_EMULATION
   #define EEPROM_PAGE_SIZE                0x800U  // 2K
   #define EEPROM_START_ADDRESS  (0x8000000UL + (STM32_FLASH_SIZE) * 1024UL - (EEPROM_PAGE_SIZE) * 2UL)
@@ -64,9 +64,9 @@
 // Limit Switches
 //
 #define X_MIN_PIN                           PD6
-#define X_MAX_PIN                           PG15 // To double check
+#define X_MAX_PIN                           PG15  // To double check
 #define Y_MIN_PIN                           PG9
-#define Y_MAX_PIN                           PG14 // To double check
+#define Y_MAX_PIN                           PG14  // To double check
 #define Z_MIN_PIN                           PG10
 #define Z_MAX_PIN                           PG13
 

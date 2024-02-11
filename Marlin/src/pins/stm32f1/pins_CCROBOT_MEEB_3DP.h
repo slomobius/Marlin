@@ -41,7 +41,7 @@
 //
 // EEPROM
 //
-#if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
   #define FLASH_EEPROM_EMULATION
   #define EEPROM_PAGE_SIZE                0x800U  // 2K
   #define EEPROM_START_ADDRESS (0x8000000UL + (STM32_FLASH_SIZE) * 1024UL - (EEPROM_PAGE_SIZE) * 2UL)
@@ -136,7 +136,7 @@
 #define EXP1_01_PIN                         PB5
 #define EXP1_02_PIN                         PB6
 #define EXP1_03_PIN                         PA2
-#define EXP1_04_PIN                         -1   // RESET
+#define EXP1_04_PIN                         -1    // RESET
 #define EXP1_05_PIN                         PA3
 #define EXP1_06_PIN                         PB8
 #define EXP1_07_PIN                         PB7
@@ -145,6 +145,7 @@
 //
 // LCD / Controller
 //
+
 #if ENABLED(CR10_STOCKDISPLAY)
   #define BEEPER_PIN                 EXP1_01_PIN
   #define BTN_EN1                    EXP1_03_PIN

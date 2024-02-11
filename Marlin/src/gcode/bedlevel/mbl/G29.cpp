@@ -64,6 +64,7 @@ inline void echo_not_entered(const char c) { SERIAL_CHAR(c); SERIAL_ECHOLNPGM(" 
  *  S5              Reset and disable mesh
  */
 void GcodeSuite::G29() {
+
   DEBUG_SECTION(log_G29, "G29", true);
 
   // G29 Q is also available if debugging
@@ -103,9 +104,8 @@ void GcodeSuite::G29() {
       bedlevel.reset();
       mbl_probe_index = 0;
       if (!ui.wait_for_move) {
-        queue.inject(parser.seen_test('N') ? F("G28" TERN(CAN_SET_LEVELING_AFTER_G28, "L0", "") "\nG29S2") : F("G29S2"));
-        TERN_(EXTENSIBLE_UI, ExtUI::onLevelingStart());
-        TERN_(DWIN_LCD_PROUI, DWIN_LevelingStart());
+        if (parser.seen_test('N'))
+          queue.inject(F("G28" TERN_(CAN_SET_LEVELING_AFTER_G28, "L0")));
 
         // Position bed horizontally and Z probe vertically.
         #if HAS_SAFE_BED_LEVELING
@@ -140,6 +140,11 @@ void GcodeSuite::G29() {
 
           do_blocking_move_to(safe_position);
         #endif // HAS_SAFE_BED_LEVELING
+
+        queue.inject(F("G29S2"));
+
+        TERN_(EXTENSIBLE_UI, ExtUI::onLevelingStart());
+        TERN_(DWIN_LCD_PROUI, DWIN_LevelingStart());
 
         return;
       }

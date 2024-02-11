@@ -158,7 +158,7 @@
 #define FAN_SOFT_PWM_REQUIRED
 
 //
-// Neopixel
+// NeoPixel
 //
 #define NEOPIXEL_PIN                        PC7
 #define NEOPIXEL2_PIN                       PC8
@@ -170,9 +170,9 @@
 #define MOSI_PIN                            PB5
 #define SCK_PIN                             PB3
 
-#define TMC_SW_MISO                     MISO_PIN
-#define TMC_SW_MOSI                     MOSI_PIN
-#define TMC_SW_SCK                       SCK_PIN
+#define TMC_SPI_MISO                    MISO_PIN
+#define TMC_SPI_MOSI                    MOSI_PIN
+#define TMC_SPI_SCK                      SCK_PIN
 
 //
 // I2C

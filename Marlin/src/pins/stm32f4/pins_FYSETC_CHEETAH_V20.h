@@ -34,7 +34,7 @@
 // Ignore temp readings during development.
 //#define BOGUS_TEMPERATURE_GRACE_PERIOD    2000
 
-#if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
   #define FLASH_EEPROM_EMULATION
   #define FLASH_EEPROM_LEVELING
 
@@ -43,14 +43,14 @@
   #define FLASH_ADDRESS_START   0x8004000
 #endif
 
-#define SERVO0_PIN                          PB1 // BL-TOUCH/PWM
+#define SERVO0_PIN                          PB1   // BL-TOUCH/PWM
 
 //
 // Limit Switches
 //
-#define X_STOP_PIN                          PB4 // X-MIN
-#define Y_STOP_PIN                          PC8 // Y-MIN
-#define Z_STOP_PIN                          PA0 // Z-MIN
+#define X_STOP_PIN                          PB4   // X-MIN
+#define Y_STOP_PIN                          PC8   // Y-MIN
+#define Z_STOP_PIN                          PA0   // Z-MIN
 
 //
 // Z Probe
@@ -59,7 +59,7 @@
   #error "You need to set jumper to 5V for BLTouch, then comment out this line to proceed."
 #endif
 #ifndef Z_MIN_PROBE_PIN
-  #define Z_MIN_PROBE_PIN                   PB1 // BL-TOUCH/PWM repurposed
+  #define Z_MIN_PROBE_PIN                   PB1   // BL-TOUCH/PWM repurposed
 #endif
 
 //
@@ -224,7 +224,7 @@
       #define DOGLCD_A0              EXP1_04_PIN
       //#define LCD_BACKLIGHT_PIN           -1
       #define LCD_RESET_PIN          EXP1_05_PIN  // Must be high or open for LCD to operate normally.
-      #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
+      #if ANY(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
         #ifndef RGB_LED_R_PIN
           #define RGB_LED_R_PIN      EXP1_06_PIN
         #endif

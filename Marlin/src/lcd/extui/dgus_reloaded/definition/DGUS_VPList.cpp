@@ -81,7 +81,7 @@ const struct DGUS_VP vp_list[] PROGMEM = {
   VP_HELPER_RX(DGUS_Addr::SCREENCHANGE_Printing, &DGUSRxHandler::ScreenChange),
 
   #if HAS_MEDIA
-    VP_HELPER_RX(DGUS_Addr::SD_SelectFile,   &DGUSRxHandler::selectFile),
+    VP_HELPER_RX(DGUS_Addr::SD_SelectFile,   &DGUSRxHandler::SelectFile),
     VP_HELPER_RX(DGUS_Addr::SD_Scroll,       &DGUSRxHandler::Scroll),
     VP_HELPER_RX_NODATA(DGUS_Addr::SD_Print, &DGUSRxHandler::PrintFile),
   #endif
@@ -178,7 +178,7 @@ const struct DGUS_VP vp_list[] PROGMEM = {
                     nullptr,
                     &DGUSTxHandler::PositionZ),
   VP_HELPER(DGUS_Addr::STATUS_Ellapsed,
-            DGUS_ELLAPSED_LEN,
+            DGUS_ELAPSED_LEN,
             VPFLAG_AUTOUPLOAD,
             nullptr,
             nullptr,

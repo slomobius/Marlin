@@ -113,18 +113,16 @@
 #endif
 
 //
-// Software SPI pins for TMC2130 stepper drivers
+// SPI pins for TMC2130 stepper drivers
 //
-#if ENABLED(TMC_USE_SW_SPI)
-  #ifndef TMC_SW_MOSI
-    #define TMC_SW_MOSI                     PD14
-  #endif
-  #ifndef TMC_SW_MISO
-    #define TMC_SW_MISO                     PD1
-  #endif
-  #ifndef TMC_SW_SCK
-    #define TMC_SW_SCK                      PD0
-  #endif
+#ifndef TMC_SPI_MOSI
+  #define TMC_SPI_MOSI                      PD14
+#endif
+#ifndef TMC_SPI_MISO
+  #define TMC_SPI_MISO                      PD1
+#endif
+#ifndef TMC_SPI_SCK
+  #define TMC_SPI_SCK                       PD0
 #endif
 
 #if HAS_TMC_UART
@@ -241,23 +239,23 @@
  *                ------                                      ------
  *                 EXP1                                        EXP2
  */
-#define EXP1_01_PIN                     PC5
-#define EXP1_02_PIN                     PE13
-#define EXP1_03_PIN                     PD13
-#define EXP1_04_PIN                     PC6
-#define EXP1_05_PIN                     PE14
-#define EXP1_06_PIN                     PE15
-#define EXP1_07_PIN                     PD11
-#define EXP1_08_PIN                     PD10
+#define EXP1_01_PIN                         PC5
+#define EXP1_02_PIN                         PE13
+#define EXP1_03_PIN                         PD13
+#define EXP1_04_PIN                         PC6
+#define EXP1_05_PIN                         PE14
+#define EXP1_06_PIN                         PE15
+#define EXP1_07_PIN                         PD11
+#define EXP1_08_PIN                         PD10
 
-#define EXP2_01_PIN                     PA6
-#define EXP2_02_PIN                     PA5
-#define EXP2_03_PIN                     PE8
-#define EXP2_04_PIN                     PE10
-#define EXP2_05_PIN                     PE11
-#define EXP2_06_PIN                     PA7
-#define EXP2_07_PIN                     PE12
-#define EXP2_08_PIN                     -1    // RESET
+#define EXP2_01_PIN                         PA6
+#define EXP2_02_PIN                         PA5
+#define EXP2_03_PIN                         PE8
+#define EXP2_04_PIN                         PE10
+#define EXP2_05_PIN                         PE11
+#define EXP2_06_PIN                         PA7
+#define EXP2_07_PIN                         PE12
+#define EXP2_08_PIN                         -1    // RESET
 
 //
 // LCD SD
@@ -286,6 +284,7 @@
 //
 // LCD / Controller
 //
+
 #if ANY(TFT_COLOR_UI, TFT_LVGL_UI, TFT_CLASSIC_UI)
   #ifndef TOUCH_CALIBRATION_X
     #define TOUCH_CALIBRATION_X           -17253
@@ -338,7 +337,7 @@
   #define LCD_USE_DMA_SPI
 
   //#define TFT_DRIVER                    ST7796
-  #define TFT_BUFFER_SIZE                  14400
+  #define TFT_BUFFER_WORDS                 14400
 
 #elif HAS_WIRED_LCD
 
@@ -362,7 +361,7 @@
     // Required for MKS_MINI_12864 with this board
     //#define MKS_LCD12864B
 
-  #else                                           // !MKS_MINI_12864
+  #else // !MKS_MINI_12864
 
     #define LCD_PINS_D4              EXP1_05_PIN
     #if IS_ULTIPANEL

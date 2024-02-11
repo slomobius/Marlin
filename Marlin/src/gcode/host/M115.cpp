@@ -59,6 +59,7 @@
  *       at https://reprap.org/wiki/Firmware_Capabilities_Protocol
  */
 void GcodeSuite::M115() {
+
   SERIAL_ECHOPGM("FIRMWARE_NAME:Marlin"
     " " DETAILED_BUILD_VERSION " (" __DATE__ " " __TIME__ ")"
     " SOURCE_CODE_URL:" SOURCE_CODE_URL
@@ -81,7 +82,7 @@ void GcodeSuite::M115() {
     // Although this code should work on all STM32 based boards
     SERIAL_ECHOPGM(" UUID:");
     uint32_t *uid_address = (uint32_t*)UID_BASE;
-    LOOP_L_N(i, 3) {
+    for (uint8_t i = 0; i < 3; ++i) {
       const uint32_t UID = uint32_t(READ_REG(*(uid_address)));
       uid_address += 4U;
       for (int B = 24; B >= 0; B -= 8) print_hex_byte(UID >> B);
@@ -231,7 +232,7 @@ void GcodeSuite::M115() {
       const xyz_pos_t lmin = dmin.asLogical(), lmax = dmax.asLogical(),
                       wmin = cmin.asLogical(), wmax = cmax.asLogical();
 
-      SERIAL_ECHOLNPGM(
+      SERIAL_ECHOPGM(
         "area:{"
           "full:{"
             "min:{"
@@ -248,6 +249,8 @@ void GcodeSuite::M115() {
               ),
             "}" // max
           "}," // full
+      );
+      SERIAL_ECHOLNPGM(
           "work:{"
             "min:{"
               LIST_N(DOUBLE(NUM_AXES),

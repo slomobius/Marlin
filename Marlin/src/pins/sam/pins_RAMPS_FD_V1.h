@@ -134,7 +134,9 @@
 #define SDSS                                   4
 #define LED_PIN                               13
 
-/**        ------                     ------
+/**
+ *                RAMPS-FD LCD adapter
+ *         ------                     ------
  *     37 | 1  2 | 35      (MISO) 50 | 1  2 | 76 (SCK)
  *     29 | 3  4 | 27       (EN2) 31 | 3  4 |  4 (SD_SS)
  *     25   5  6 | 23       (EN1) 33   5  6 | 75 (MOSI)
@@ -164,8 +166,8 @@
 //
 // LCD / Controller
 //
+
 #if HAS_WIRED_LCD
-  // ramps-fd lcd adaptor
 
   #define BEEPER_PIN                 EXP1_01_PIN
 
@@ -191,7 +193,7 @@
 
     #define LCD_RESET_PIN            EXP1_06_PIN  // Must be high or open for LCD to operate normally.
 
-    #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
+    #if ANY(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
       #ifndef RGB_LED_R_PIN
         #define RGB_LED_R_PIN        EXP1_05_PIN
       #endif
@@ -219,7 +221,7 @@
 
   #endif
 
-  #if EITHER(VIKI2, miniVIKI)
+  #if ANY(VIKI2, miniVIKI)
     #define DOGLCD_A0                EXP1_07_PIN
     #define KILL_PIN                          51
     #define STAT_LED_BLUE_PIN        EXP1_03_PIN

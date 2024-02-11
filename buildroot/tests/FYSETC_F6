@@ -30,6 +30,13 @@ opt_set MOTHERBOARD BOARD_FYSETC_F6_13
 exec_test $1 $2 "DELTA / FLSUN Auto-Calibrate" "$3"
 
 #
+# Delta Config (FLSUN AC because it's complex)
+#
+use_example_configs delta/FLSUN/auto_calibrate
+opt_set MOTHERBOARD BOARD_FYSETC_F6_13
+exec_test $1 $2 "DELTA / FLSUN Auto-Calibrate" "$3"
+
+#
 # Delta Config (generic) + UBL + ALLEN_KEY + EEPROM_SETTINGS + OLED_PANEL_TINYBOY2
 #
 use_example_configs delta/generic

@@ -37,6 +37,7 @@
  *   H<microsteps> - Specify micro-steps to use. Best guess if not supplied.
  *   L<linear>     - Desired layer height in current units. Nearest good heights are shown.
  */
+
 void GcodeSuite::M92() {
 
   const int8_t target_extruder = get_target_extruder_from_command();
@@ -93,6 +94,7 @@ void GcodeSuite::M92() {
 void GcodeSuite::M92_report(const bool forReplay/*=true*/, const int8_t e/*=-1*/) {
   report_heading_etc(forReplay, F(STR_STEPS_PER_UNIT));
   #if NUM_AXES
+    #define PRINT_EOL
     SERIAL_ECHOPGM_P(LIST_N(DOUBLE(NUM_AXES),
       PSTR("  M92 X"), LINEAR_UNIT(planner.settings.axis_steps_per_mm[X_AXIS]),
       SP_Y_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[Y_AXIS]),
@@ -107,15 +109,14 @@ void GcodeSuite::M92_report(const bool forReplay/*=true*/, const int8_t e/*=-1*/
   #endif
 
   #if HAS_EXTRUDERS && DISABLED(DISTINCT_E_FACTORS)
+    #define PRINT_EOL
     SERIAL_ECHOPGM_P(SP_E_STR, VOLUMETRIC_UNIT(planner.settings.axis_steps_per_mm[E_AXIS]));
   #endif
 
-  #if NUM_AXES || (HAS_EXTRUDERS && DISABLED(DISTINCT_E_FACTORS))
-    SERIAL_EOL();
-  #endif
+  if (ENABLED(PRINT_EOL)) SERIAL_EOL();
 
   #if ENABLED(DISTINCT_E_FACTORS)
-    LOOP_L_N(i, E_STEPPERS) {
+    for (uint8_t i = 0; i < E_STEPPERS; ++i) {
       if (e >= 0 && i != e) continue;
       report_echo_start(forReplay);
       SERIAL_ECHOLNPGM_P(

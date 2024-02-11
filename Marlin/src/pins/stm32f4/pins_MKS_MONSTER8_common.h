@@ -126,22 +126,23 @@
 #endif
 
 //
-// Software SPI pins for TMC2130 stepper drivers
+// Default pins for TMC software SPI
 // This board only supports SW SPI for stepper drivers
 //
 #if HAS_TMC_SPI
   #define TMC_USE_SW_SPI
 #endif
-#if ENABLED(TMC_USE_SW_SPI)
-  #if !defined(TMC_SW_MOSI) || TMC_SW_MOSI == -1
-    #define TMC_SW_MOSI                     PE14
-  #endif
-  #if !defined(TMC_SW_MISO) || TMC_SW_MISO == -1
-    #define TMC_SW_MISO                     PE13
-  #endif
-  #if !defined(TMC_SW_SCK) || TMC_SW_SCK == -1
-    #define TMC_SW_SCK                      PE12
-  #endif
+#if !defined(TMC_SPI_MOSI) || TMC_SPI_MOSI == -1
+  #undef TMC_SPI_MOSI
+  #define TMC_SPI_MOSI                      PE14
+#endif
+#if !defined(TMC_SPI_MISO) || TMC_SPI_MISO == -1
+  #undef TMC_SPI_MISO
+  #define TMC_SPI_MISO                      PE13
+#endif
+#if !defined(TMC_SPI_SCK) || TMC_SPI_SCK == -1
+  #undef TMC_SPI_SCK
+  #define TMC_SPI_SCK                       PE12
 #endif
 
 #if HAS_TMC_UART
@@ -262,7 +263,7 @@
   #endif
 #endif
 
-#if EITHER(TFT_COLOR_UI, TFT_CLASSIC_UI)
+#if ANY(TFT_COLOR_UI, TFT_CLASSIC_UI)
   #define TFT_CS_PIN                 EXP1_07_PIN
   #define TFT_SCK_PIN                EXP2_02_PIN
   #define TFT_MISO_PIN               EXP2_01_PIN
@@ -293,7 +294,7 @@
   #define LCD_READ_ID                       0xD3
   #define LCD_USE_DMA_SPI
 
-  #define TFT_BUFFER_SIZE                  14400
+  #define TFT_BUFFER_WORDS                 14400
 
   #ifndef TOUCH_CALIBRATION_X
     #define TOUCH_CALIBRATION_X           -17253

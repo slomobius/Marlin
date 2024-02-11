@@ -81,7 +81,6 @@
 #define REPORT_NAME_DIGITAL(COUNTER, NAME) _ADD_PIN(NAME, COUNTER, true)
 #define REPORT_NAME_ANALOG(COUNTER, NAME) _ADD_PIN(analogInputToDigitalPin(NAME), COUNTER, false)
 
-
 typedef struct {
   PGM_P const name;
   pin_t pin;
@@ -100,7 +99,7 @@ const PinInfo pin_array[] PROGMEM = {
    */
 
   #if SERIAL_IN_USE(0)
-    #if EITHER(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
+    #if ANY(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
       { RXD_NAME_0, 0, true },
       { TXD_NAME_0, 1, true },
     #elif AVR_ATmega1284_FAMILY
@@ -113,7 +112,7 @@ const PinInfo pin_array[] PROGMEM = {
   #endif
 
   #if SERIAL_IN_USE(1)
-    #if EITHER(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
+    #if ANY(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
       { RXD_NAME_1, 19, true },
       { TXD_NAME_1, 18, true },
     #elif AVR_ATmega1284_FAMILY
@@ -131,7 +130,7 @@ const PinInfo pin_array[] PROGMEM = {
   #endif
 
   #if SERIAL_IN_USE(2)
-    #if EITHER(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
+    #if ANY(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
       { RXD_NAME_2, 17, true },
       { TXD_NAME_2, 16, true },
     #elif defined(TARGET_LPC1768)
@@ -146,7 +145,7 @@ const PinInfo pin_array[] PROGMEM = {
   #endif
 
   #if SERIAL_IN_USE(3)
-    #if EITHER(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
+    #if ANY(AVR_ATmega2560_FAMILY, ARDUINO_ARCH_SAM)
       { RXD_NAME_3, 15, true },
       { TXD_NAME_3, 14, true },
     #elif defined(TARGET_LPC1768)
@@ -206,7 +205,7 @@ inline void report_pin_state_extended(const pin_t pin, const bool ignore, const 
     return true;
   };
 
-  LOOP_L_N(x, COUNT(pin_array))  {    // scan entire array and report all instances of this pin
+  for (uint8_t x = 0; x < COUNT(pin_array); ++x)  {    // scan entire array and report all instances of this pin
     if (GET_ARRAY_PIN(x) == pin) {
       if (!found) {    // report digital and analog pin number only on the first time through
         if (start_string) SERIAL_ECHOF(start_string);

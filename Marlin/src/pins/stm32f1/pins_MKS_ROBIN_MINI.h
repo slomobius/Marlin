@@ -43,7 +43,7 @@
 //
 // EEPROM
 //
-#if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
   #define FLASH_EEPROM_EMULATION
   #define EEPROM_PAGE_SIZE              (0x800U)  // 2K
   #define EEPROM_START_ADDRESS      (0x8000000UL + (STM32_FLASH_SIZE) * 1024UL - (EEPROM_PAGE_SIZE) * 2UL)
@@ -159,10 +159,9 @@
   #define FSMC_CS_PIN                 TFT_CS_PIN  // NE4
   #define FSMC_RS_PIN                 TFT_RS_PIN  // A0
 
-  #define TFT_CS_PIN                 FSMC_CS_PIN
-  #define TFT_RS_PIN                 FSMC_RS_PIN
-
   #define LCD_USE_DMA_FSMC                        // Use DMA transfers to send data to the TFT
+  #define FSMC_DMA_DEV                      DMA2
+  #define FSMC_DMA_CHANNEL               DMA_CH5
 
   #if NEED_TOUCH_PINS
     #define TOUCH_CS_PIN                    PC2   // SPI2_NSS
@@ -175,7 +174,7 @@
 
 #if ENABLED(TFT_320x240)                          // TFT32/28
   #define TFT_DRIVER                     ILI9341
-  #define TFT_BUFFER_SIZE                  14400
+  #define TFT_BUFFER_WORDS                 14400
   #define ILI9341_COLOR_RGB
   // YV for normal screen mounting
   #define ILI9341_ORIENTATION  ILI9341_MADCTL_MY | ILI9341_MADCTL_MV

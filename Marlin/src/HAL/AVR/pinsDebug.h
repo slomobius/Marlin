@@ -77,12 +77,12 @@
 
 void PRINT_ARRAY_NAME(uint8_t x) {
   PGM_P const name_mem_pointer = (PGM_P)pgm_read_ptr(&pin_array[x].name);
-  LOOP_L_N(y, MAX_NAME_LENGTH) {
+  for (uint8_t y = 0; y < MAX_NAME_LENGTH; ++y) {
     char temp_char = pgm_read_byte(name_mem_pointer + y);
     if (temp_char != 0)
       SERIAL_CHAR(temp_char);
     else {
-      LOOP_L_N(i, MAX_NAME_LENGTH - y) SERIAL_CHAR(' ');
+      for (uint8_t i = 0; i < MAX_NAME_LENGTH - y; ++i) SERIAL_CHAR(' ');
       break;
     }
   }
@@ -163,7 +163,6 @@ bool pwm_status(uint8_t pin) {
   SERIAL_ECHO_SP(2);
 } // pwm_status
 
-
 const volatile uint8_t* const PWM_other[][3] PROGMEM = {
     { &TCCR0A, &TCCR0B, &TIMSK0 },
     { &TCCR1A, &TCCR1B, &TIMSK1 },
@@ -180,7 +179,6 @@ const volatile uint8_t* const PWM_other[][3] PROGMEM = {
     { &TCCR5A, &TCCR5B, &TIMSK5 },
   #endif
 };
-
 
 const volatile uint8_t* const PWM_OCR[][3] PROGMEM = {
 
@@ -216,7 +214,6 @@ const volatile uint8_t* const PWM_OCR[][3] PROGMEM = {
     { (const uint8_t*)&OCR5A, (const uint8_t*)&OCR5B, (const uint8_t*)&OCR5C },
   #endif
 };
-
 
 #define TCCR_A(T)   pgm_read_word(&PWM_other[T][0])
 #define TCCR_B(T)   pgm_read_word(&PWM_other[T][1])

@@ -50,9 +50,6 @@
 #include "module/settings.h"
 #include "module/stepper.h"
 #include "module/temperature.h"
-#if ENABLED(FT_MOTION)
-  #include "module/ft_motion.h"
-#endif
 
 #include "gcode/gcode.h"
 #include "gcode/parser.h"
@@ -175,8 +172,6 @@
   #include "module/polargraph.h"
 #elif IS_SCARA
   #include "module/scara.h"
-#elif ENABLED(POLAR)
-  #include "module/polar.h"
 #endif
 
 #if HAS_LEVELING
@@ -199,7 +194,7 @@
   #include "feature/runout.h"
 #endif
 
-#if EITHER(PROBE_TARE, HAS_Z_SERVO_PROBE)
+#if ANY(PROBE_TARE, HAS_Z_SERVO_PROBE)
   #include "module/probe.h"
 #endif
 
@@ -241,7 +236,7 @@
   #include "feature/password/password.h"
 #endif
 
-#if DGUS_LCD_UI_MKS
+#if ENABLED(DGUS_LCD_UI_MKS)
   #include "lcd/extui/dgus/DGUSScreenHandler.h"
 #endif
 
@@ -321,7 +316,7 @@ bool pin_is_protected(const pin_t pin) {
     static constexpr size_t pincount = OnlyPins<SENSITIVE_PINS>::size;
     static const pin_t (&sensitive_pins)[pincount] PROGMEM = OnlyPins<SENSITIVE_PINS>::table;
   #endif
-  LOOP_L_N(i, pincount) {
+  for (uint8_t i = 0; i < pincount; ++i) {
     const pin_t * const pptr = &sensitive_pins[i];
     if (pin == (sizeof(pin_t) == 2 ? (pin_t)pgm_read_word(pptr) : (pin_t)pgm_read_byte(pptr))) return true;
   }
@@ -356,9 +351,7 @@ void startOrResumeJob() {
     TERN_(GCODE_REPEAT_MARKERS, repeat.reset());
     TERN_(CANCEL_OBJECTS, cancelable.reset());
     TERN_(LCD_SHOW_E_TOTAL, e_move_accumulator = 0);
-    #if ENABLED(SET_REMAINING_TIME)
-      ui.reset_remaining_time();
-    #endif
+    TERN_(SET_REMAINING_TIME, ui.reset_remaining_time());
   }
   print_job_timer.start();
 }
@@ -676,9 +669,28 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
       && ELAPSED(ms, gcode.previous_move_ms + SEC_TO_MS(EXTRUDER_RUNOUT_SECONDS))
       && !planner.has_blocks_queued()
     ) {
-      const int8_t e_stepper = TERN(HAS_SWITCHING_EXTRUDER, active_extruder >> 1, active_extruder);
-      const bool e_off = !stepper.AXIS_IS_ENABLED(E_AXIS, e_stepper);
-      if (e_off) stepper.ENABLE_EXTRUDER(e_stepper);
+      #if ENABLED(SWITCHING_EXTRUDER)
+        bool oldstatus;
+        switch (active_extruder) {
+          default: oldstatus = stepper.AXIS_IS_ENABLED(E_AXIS, 0); stepper.ENABLE_EXTRUDER(0); break;
+          #if E_STEPPERS > 1
+            case 2: case 3: oldstatus = stepper.AXIS_IS_ENABLED(E_AXIS, 1); stepper.ENABLE_EXTRUDER(1); break;
+            #if E_STEPPERS > 2
+              case 4: case 5: oldstatus = stepper.AXIS_IS_ENABLED(E_AXIS, 2); stepper.ENABLE_EXTRUDER(2); break;
+              #if E_STEPPERS > 3
+                case 6: case 7: oldstatus = stepper.AXIS_IS_ENABLED(E_AXIS, 3); stepper.ENABLE_EXTRUDER(3); break;
+              #endif // E_STEPPERS > 3
+            #endif // E_STEPPERS > 2
+          #endif // E_STEPPERS > 1
+        }
+      #else // !SWITCHING_EXTRUDER
+        bool oldstatus;
+        switch (active_extruder) {
+          default:
+          #define _CASE_EN(N) case N: oldstatus = stepper.AXIS_IS_ENABLED(E_AXIS, N); stepper.ENABLE_EXTRUDER(N); break;
+          REPEAT(E_STEPPERS, _CASE_EN);
+        }
+      #endif
 
       const float olde = current_position.e;
       current_position.e += EXTRUDER_RUNOUT_EXTRUDE;
@@ -687,7 +699,22 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
       planner.set_e_position_mm(olde);
       planner.synchronize();
 
-      if (e_off) stepper.DISABLE_EXTRUDER(e_stepper);
+      #if ENABLED(SWITCHING_EXTRUDER)
+        switch (active_extruder) {
+          default: if (oldstatus) stepper.ENABLE_EXTRUDER(0); else stepper.DISABLE_EXTRUDER(0); break;
+          #if E_STEPPERS > 1
+            case 2: case 3: if (oldstatus) stepper.ENABLE_EXTRUDER(1); else stepper.DISABLE_EXTRUDER(1); break;
+            #if E_STEPPERS > 2
+              case 4: case 5: if (oldstatus) stepper.ENABLE_EXTRUDER(2); else stepper.DISABLE_EXTRUDER(2); break;
+            #endif // E_STEPPERS > 2
+          #endif // E_STEPPERS > 1
+        }
+      #else // !SWITCHING_EXTRUDER
+        switch (active_extruder) {
+          #define _CASE_RESTORE(N) case N: if (oldstatus) stepper.ENABLE_EXTRUDER(N); else stepper.DISABLE_EXTRUDER(N); break;
+          REPEAT(E_STEPPERS, _CASE_RESTORE);
+        }
+      #endif // !SWITCHING_EXTRUDER
 
       gcode.reset_stepper_timeout(ms);
     }
@@ -725,10 +752,6 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
     }
   #endif
 }
-
-#if BOTH(EP_BABYSTEPPING, EMERGENCY_PARSER)
-  #include "feature/babystep.h"
-#endif
 
 /**
  * Standard idle routine keeps the machine alive:
@@ -800,7 +823,7 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   // Run StallGuard endstop checks
   #if ENABLED(SPI_ENDSTOPS)
     if (endstops.tmc_spi_homing.any && TERN1(IMPROVE_HOMING_RELIABILITY, ELAPSED(millis(), sg_guard_period)))
-      LOOP_L_N(i, 4) if (endstops.tmc_spi_homing_check()) break; // Read SGT 4 times per idle loop
+      for (uint8_t i = 0; i < 4; ++i) if (endstops.tmc_spi_homing_check()) break; // Read SGT 4 times per idle loop
   #endif
 
   // Handle SD Card insert / remove
@@ -852,23 +875,14 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   // Handle Joystick jogging
   TERN_(POLL_JOG, joystick.inject_jog_moves());
 
-  // Async Babystepping via the Emergency Parser
-  #if BOTH(EP_BABYSTEPPING, EMERGENCY_PARSER)
-    babystep.do_ep_steps();
-  #endif
-
   // Direct Stepping
   TERN_(DIRECT_STEPPING, page_manager.write_responses());
 
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
 
-  // Manage Fixed-time Motion Control
-  TERN_(FT_MOTION, fxdTiCtrl.loop());
-
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
-
   return;
 }
 
@@ -924,7 +938,7 @@ void minkill(const bool steppers_off/*=false*/) {
 
   TERN_(HAS_SUICIDE, suicide());
 
-  #if EITHER(HAS_KILL, SOFT_RESET_ON_KILL)
+  #if ANY(HAS_KILL, SOFT_RESET_ON_KILL)
 
     // Wait for both KILL and ENC to be released
     while (TERN0(HAS_KILL, kill_state()) || TERN0(SOFT_RESET_ON_KILL, ui.button_pressed()))
@@ -953,7 +967,7 @@ void stop() {
 
   print_job_timer.stop();
 
-  #if EITHER(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
+  #if ANY(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
     thermalManager.set_fans_paused(false); // Un-pause fans for safety
   #endif
 
@@ -1063,7 +1077,7 @@ inline void tmc_standby_setup() {
  *  - Init the buzzer, possibly a custom timer
  *  - Init more optional hardware:
  *    • Color LED illumination
- *    • Neopixel illumination
+ *    • NeoPixel illumination
  *    • Controller Fan
  *    • Creality DWIN LCD (show boot image)
  *    • Tare the Probe if possible
@@ -1315,14 +1329,14 @@ void setup() {
     #endif
   #endif
 
-  #if BOTH(HAS_MEDIA, SDCARD_EEPROM_EMULATION)
+  #if ALL(HAS_MEDIA, SDCARD_EEPROM_EMULATION)
     SETUP_RUN(card.mount());          // Mount media with settings before first_load
   #endif
 
   SETUP_RUN(settings.first_load());   // Load data from EEPROM if available (or use defaults)
                                       // This also updates variables in the planner, elsewhere
 
-  #if BOTH(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
+  #if ALL(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
     SETUP_RUN(ui.show_bootscreen());
     const millis_t bootscreen_ms = millis();
   #endif
@@ -1397,7 +1411,7 @@ void setup() {
     SETUP_RUN(stepper_dac.init());
   #endif
 
-  #if EITHER(Z_PROBE_SLED, SOLENOID_PROBE) && HAS_SOLENOID_1
+  #if ANY(Z_PROBE_SLED, SOLENOID_PROBE) && HAS_SOLENOID_1
     OUT_WRITE(SOL1_PIN, LOW); // OFF
   #endif
 
@@ -1605,7 +1619,7 @@ void setup() {
     SETUP_RUN(tft_lvgl_init());
   #endif
 
-  #if BOTH(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
+  #if ALL(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
     const millis_t elapsed = millis() - bootscreen_ms;
     #if ENABLED(MARLIN_DEV_MODE)
       SERIAL_ECHOLNPGM("elapsed=", elapsed);
@@ -1617,7 +1631,7 @@ void setup() {
     SETUP_RUN(password.lock_machine());      // Will not proceed until correct password provided
   #endif
 
-  #if BOTH(HAS_MARLINUI_MENU, TOUCH_SCREEN_CALIBRATION) && EITHER(TFT_CLASSIC_UI, TFT_COLOR_UI)
+  #if ALL(HAS_MARLINUI_MENU, TOUCH_SCREEN_CALIBRATION) && ANY(TFT_CLASSIC_UI, TFT_COLOR_UI)
     SETUP_RUN(ui.check_touch_calibration());
   #endif
 
@@ -1633,17 +1647,7 @@ void setup() {
     SETUP_RUN(bdl.init(I2C_BD_SDA_PIN, I2C_BD_SCL_PIN, I2C_BD_DELAY));
   #endif
 
-  #if ENABLED(FT_MOTION)
-    SETUP_RUN(fxdTiCtrl.init());
-  #endif
-
   marlin_state = MF_RUNNING;
-
-  #ifdef STARTUP_TUNE
-    // Play a short startup tune before continuing.
-    constexpr uint16_t tune[] = STARTUP_TUNE;
-    for (uint8_t i = 0; i < COUNT(tune) - 1; i += 2) BUZZ(tune[i + 1], tune[i]);
-  #endif
 
   SETUP_LOG("setup() completed.");
 
@@ -1674,7 +1678,7 @@ void loop() {
 
     queue.advance();
 
-    #if EITHER(POWER_OFF_TIMER, POWER_OFF_WAIT_FOR_COOLDOWN)
+    #if ANY(POWER_OFF_TIMER, POWER_OFF_WAIT_FOR_COOLDOWN)
       powerManager.checkAutoPowerOff();
     #endif
 
