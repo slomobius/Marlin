@@ -568,6 +568,24 @@
   #define FYSETC_MINI_12864_2_1
 #endif
 
+<<<<<<< Updated upstream
+=======
+// Old settings are now conditional on DGUS_LCD_UI
+//#if DGUS_UI_IS(ORIGIN)
+  #define DGUS_LCD_UI_ORIGIN 1
+//#elif DGUS_UI_IS(FYSETC)
+  #define DGUS_LCD_UI_FYSETC 1
+//#elif DGUS_UI_IS(HIPRECY)
+  #define DGUS_LCD_UI_HIPRECY 1
+//#elif DGUS_UI_IS(MKS)
+  #define DGUS_LCD_UI_MKS 1
+//#elif DGUS_UI_IS(RELOADED)
+  #define DGUS_LCD_UI_RELOADED 1
+//#elif DGUS_UI_IS(IA_CREALITY)
+  #define DGUS_LCD_UI_IA_CREALITY 1
+//#endif
+
+>>>>>>> Stashed changes
 /**
  * General Flags that may be set below by specific LCDs
  *
@@ -993,12 +1011,18 @@
 #endif
 
 // Aliases for LCD features
+<<<<<<< Updated upstream
 #if ANY(DGUS_LCD_UI_ORIGIN, DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_HIPRECY, DGUS_LCD_UI_MKS, DGUS_LCD_UI_RELOADED)
   #define HAS_DGUS_LCD 1
   #if DISABLED(DGUS_LCD_UI_RELOADED)
+=======
+//#if !DGUS_UI_IS(NONE) || ENABLED(ANYCUBIC_LCD_VYPER)
+  //#define HAS_DGUS_LCD 1
+  #if DGUS_UI_IS(ORIGIN, FYSETC, HIPRECY, MKS)
+>>>>>>> Stashed changes
     #define HAS_DGUS_LCD_CLASSIC 1
-  #endif
-#endif
+  //#endif
+//#endif
 
 // Extensible UI serial touch screens. (See src/lcd/extui)
 #if ANY(HAS_DGUS_LCD, MALYAN_LCD, ANYCUBIC_LCD_I3MEGA, ANYCUBIC_LCD_CHIRON, NEXTION_TFT, TOUCH_UI_FTDI_EVE)

@@ -1869,7 +1869,11 @@
 
   #define DGUS_UPDATE_INTERVAL_MS  500    // (ms) Interval between automatic screen updates
 
+<<<<<<< Updated upstream
   #if ANY(DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_MKS, DGUS_LCD_UI_HIPRECY)
+=======
+  //#if DGUS_UI_IS(FYSETC, MKS, HIPRECY)
+>>>>>>> Stashed changes
     #define DGUS_PRINT_FILENAME           // Display the filename during printing
     #define DGUS_PREHEAT_UI               // Display a preheat screen during heatup
 

@@ -3005,6 +3005,7 @@
  *  - Plug the microSD card into the back of the display.
  *  - Boot the display and wait for the update to complete.
  */
+<<<<<<< Updated upstream
 //#define DGUS_LCD_UI_ORIGIN
 //#define DGUS_LCD_UI_FYSETC
 //#define DGUS_LCD_UI_HIPRECY
@@ -3013,6 +3014,15 @@
 #if ENABLED(DGUS_LCD_UI_MKS)
   #define USE_MKS_GREEN_UI
 #endif
+=======
+//#define DGUS_LCD_UI ORIGIN
+//#if DGUS_UI_IS(MKS)
+  #define USE_MKS_GREEN_UI
+//#elif DGUS_UI_IS(IA_CREALITY)
+  //#define LCD_SCREEN_ROTATE 90          // Portrait Mode or 800x480 displays
+  //#define IA_CREALITY_BOOT_DELAY 1500   // (ms)
+//#endif
+>>>>>>> Stashed changes
 
 //
 // Touch-screen LCD for Malyan M200/M300 printers
