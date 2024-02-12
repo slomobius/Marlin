@@ -568,8 +568,6 @@
   #define FYSETC_MINI_12864_2_1
 #endif
 
-<<<<<<< Updated upstream
-=======
 // Old settings are now conditional on DGUS_LCD_UI
 //#if DGUS_UI_IS(ORIGIN)
   #define DGUS_LCD_UI_ORIGIN 1
@@ -585,7 +583,6 @@
   #define DGUS_LCD_UI_IA_CREALITY 1
 //#endif
 
->>>>>>> Stashed changes
 /**
  * General Flags that may be set below by specific LCDs
  *
