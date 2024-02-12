@@ -1009,8 +1009,8 @@
 
 // Aliases for LCD features
 //#if !DGUS_UI_IS(NONE) || ENABLED(ANYCUBIC_LCD_VYPER)
-  //#define HAS_DGUS_LCD 1
-  #if DGUS_UI_IS(ORIGIN, FYSETC, HIPRECY, MKS)
+  #define HAS_DGUS_LCD 1
+  //#if DGUS_UI_IS(ORIGIN, FYSETC, HIPRECY, MKS)
     #define HAS_DGUS_LCD_CLASSIC 1
   //#endif
 //#endif
