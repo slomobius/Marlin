@@ -570,17 +570,17 @@
 
 // Old settings are now conditional on DGUS_LCD_UI
 //#if DGUS_UI_IS(ORIGIN)
-  #define DGUS_LCD_UI_ORIGIN 1
+  //#define DGUS_LCD_UI_ORIGIN 1
 //#elif DGUS_UI_IS(FYSETC)
-  #define DGUS_LCD_UI_FYSETC 1
+  //#define DGUS_LCD_UI_FYSETC 1
 //#elif DGUS_UI_IS(HIPRECY)
-  #define DGUS_LCD_UI_HIPRECY 1
+  //#define DGUS_LCD_UI_HIPRECY 1
 //#elif DGUS_UI_IS(MKS)
-  #define DGUS_LCD_UI_MKS 1
+  //#define DGUS_LCD_UI_MKS 1
 //#elif DGUS_UI_IS(RELOADED)
-  #define DGUS_LCD_UI_RELOADED 1
+  //#define DGUS_LCD_UI_RELOADED 1
 //#elif DGUS_UI_IS(IA_CREALITY)
-  #define DGUS_LCD_UI_IA_CREALITY 1
+  //#define DGUS_LCD_UI_IA_CREALITY 1
 //#endif
 
 /**
